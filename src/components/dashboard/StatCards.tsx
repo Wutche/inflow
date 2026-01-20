@@ -12,6 +12,7 @@ import {
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { useBridgeHistory } from "@/hooks/useBridgeHistory";
+import { useInvoiceHistory } from "@/hooks/useInvoiceHistory";
 
 function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -37,20 +38,20 @@ function StatCard({
   iconColor,
 }: StatCardProps) {
   return (
-    <div className="bg-white p-6 rounded-3xl border border-border-subtle shadow-sleek transition-all hover:shadow-md group">
+    <div className="bg-card p-6 rounded-3xl border border-border-subtle dark:shadow-dark-sleek transition-all group">
       <div className="flex justify-between items-start mb-4">
         <div
           className={cn(
-            "p-2 rounded-xl bg-opacity-10",
-            iconColor || "bg-brand-orange/10",
+            "p-2.5 rounded-xl transition-colors",
+            iconColor || "bg-brand-orange/10 dark:bg-brand-orange/20",
           )}
         >
           <Icon
             className={cn(
-              "inline-block",
+              "inline-block transition-colors",
               iconColor
-                ? iconColor.replace("bg-", "text-")
-                : "text-brand-orange",
+                ? iconColor.replace("bg-", "text-").replace("/10", "").replace("/20", "")
+                : "text-brand-orange dark:text-brand-orange/90",
             )}
             size={20}
           />
@@ -58,10 +59,10 @@ function StatCard({
         {trend && (
           <div
             className={cn(
-              "flex items-center gap-1 text-xs font-medium px-2 py-1 rounded-full",
+              "flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-tight",
               trend === "up"
-                ? "bg-green-50 text-green-600"
-                : "bg-red-50 text-red-600",
+                ? "bg-green-500/10 text-green-500 border border-green-500/20"
+                : "bg-red-500/10 text-red-500 border border-red-500/20",
             )}
           >
             {trend === "up" ? (
@@ -75,7 +76,7 @@ function StatCard({
       </div>
       <div>
         <h3 className="text-muted text-sm font-medium mb-1">{title}</h3>
-        <span className="text-2xl font-bold tracking-tight">{value}</span>
+        <span className="text-2xl font-bold tracking-tight text-foreground">{value}</span>
         <p className="text-muted text-xs mt-2 font-medium">{subtitle}</p>
       </div>
     </div>
@@ -90,13 +91,20 @@ function formatCurrency(amount: number): string {
 }
 
 export function StatCards() {
-  const { stats, isLoaded } = useBridgeHistory();
+  const { stats, isLoaded: bridgeLoaded } = useBridgeHistory();
+  const { history, isLoaded: invoiceLoaded } = useInvoiceHistory();
 
   // Calculate values from real bridge history
-  const totalReceived = isLoaded ? formatCurrency(stats.totalReceived) : "0.00";
-  const totalSent = isLoaded ? formatCurrency(stats.totalSent) : "0.00";
-  const bridgeVolume = isLoaded ? formatCurrency(stats.totalVolume) : "0.00";
-  const pendingCount = isLoaded ? stats.pendingCount : 0;
+  const totalReceived = bridgeLoaded ? formatCurrency(stats.totalReceived) : "0.00";
+  const totalSent = bridgeLoaded ? formatCurrency(stats.totalSent) : "0.00";
+  const bridgeVolume = bridgeLoaded ? formatCurrency(stats.totalVolume) : "0.00";
+  
+  // Count pending items: pending invoices + pending bridge transactions
+  const pendingInvoices = invoiceLoaded 
+    ? history.filter(inv => inv.status === "pending").length 
+    : 0;
+  const pendingBridge = bridgeLoaded ? stats.pendingCount : 0;
+  const totalPending = pendingInvoices + pendingBridge;
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
@@ -111,21 +119,21 @@ export function StatCards() {
         value={`$${totalSent}`}
         subtitle="Cross-chain payments"
         icon={ArrowUpRight}
-        iconColor="bg-blue-500/10"
+        iconColor="bg-blue-500/10 dark:bg-blue-500/20"
       />
       <StatCard
         title="Pending"
-        value={pendingCount.toString()}
-        subtitle="Awaiting confirmation"
+        value={totalPending.toString()}
+        subtitle={`${pendingInvoices} invoices • ${pendingBridge} transfers`}
         icon={Clock}
-        iconColor="bg-amber-500/10"
+        iconColor="bg-amber-500/10 dark:bg-amber-500/20"
       />
       <StatCard
         title="Bridge Volume"
         value={`$${bridgeVolume}`}
         subtitle="Via xReserve"
         icon={ArrowLeftRight}
-        iconColor="bg-indigo-500/10"
+        iconColor="bg-indigo-500/10 dark:bg-indigo-500/20"
       />
     </div>
   );

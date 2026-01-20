@@ -214,20 +214,15 @@ export function decodeInvoice(token: string | null): InvoiceData | null {
     const result = InvoiceSchema.safeParse(parsed);
 
     if (!result.success) {
-      // Log validation errors in development for debugging
-      if (process.env.NODE_ENV === "development") {
-        console.warn("[url-state] Validation failed:", result.error.issues);
-      }
+      // Log validation errors for debugging (non-blocking)
+      console.warn("[url-state] Validation failed:", result.error.issues);
       return null;
     }
 
     return result.data;
   } catch (error) {
     // Catch any errors from atob, JSON.parse, or TextDecoder
-    // Log in development for debugging purposes
-    if (process.env.NODE_ENV === "development") {
-      console.warn("[url-state] Decode error:", error);
-    }
+    console.warn("[url-state] Decode error:", error);
     return null;
   }
 }

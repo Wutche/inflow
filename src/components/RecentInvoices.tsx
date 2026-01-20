@@ -68,11 +68,11 @@ function InvoiceItem({ item }: { item: HistoryItem }) {
     <motion.div
       initial={{ opacity: 0, y: 5 }}
       animate={{ opacity: 1, y: 0 }}
-      className="flex items-center justify-between py-3 px-4 rounded-xl hover:bg-sidebar transition-colors group"
+      className="flex items-center justify-between py-3 px-4 rounded-xl hover:bg-sidebar-hover transition-colors group"
     >
       <div className="flex items-center gap-3 min-w-0 flex-1">
         {/* Icon */}
-        <div className="w-8 h-8 rounded-lg bg-brand-orange/10 flex items-center justify-center flex-shrink-0">
+        <div className="w-8 h-8 rounded-lg bg-brand-orange/10 flex items-center justify-center shrink-0">
           <FileText size={14} className="text-brand-orange" />
         </div>
 
@@ -98,10 +98,10 @@ function InvoiceItem({ item }: { item: HistoryItem }) {
             <span
               className={`px-1.5 py-0.5 rounded text-[8px] font-black uppercase tracking-wide ${
                 item.status === "paid"
-                  ? "bg-green-50 text-green-600"
+                  ? "bg-green-500/10 text-green-600 dark:text-green-400 border border-green-500/20"
                   : item.status === "expired"
-                    ? "bg-red-50 text-red-600"
-                    : "bg-amber-50 text-amber-600"
+                    ? "bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/20"
+                    : "bg-orange-500/10 text-orange-600 dark:text-orange-400 border border-orange-500/20"
               }`}
             >
               {item.status || "pending"}
@@ -116,8 +116,8 @@ function InvoiceItem({ item }: { item: HistoryItem }) {
         onClick={copyLink}
         className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
           copied
-            ? "bg-green-100 text-green-700"
-            : "bg-white border border-border-subtle hover:bg-gray-50 opacity-0 group-hover:opacity-100"
+            ? "bg-brand-orange text-white dark:shadow-lg dark:shadow-brand-orange/20"
+            : "bg-card border border-border-subtle hover:bg-sidebar-hover opacity-0 group-hover:opacity-100"
         }`}
       >
         {copied ? (
@@ -149,12 +149,12 @@ export function RecentInvoices() {
   // Don't render anything until localStorage is loaded (SSR safety)
   if (!isLoaded) {
     return (
-      <div className="bg-white rounded-3xl border border-border-subtle shadow-sleek p-6">
+      <div className="bg-card rounded-3xl border border-border-subtle dark:shadow-dark-sleek p-6">
         <div className="animate-pulse">
-          <div className="h-6 bg-gray-100 rounded w-1/3 mb-4" />
+          <div className="h-6 bg-sidebar rounded w-1/3 mb-4" />
           <div className="space-y-3">
-            <div className="h-12 bg-gray-50 rounded-xl" />
-            <div className="h-12 bg-gray-50 rounded-xl" />
+            <div className="h-12 bg-sidebar/50 rounded-xl" />
+            <div className="h-12 bg-sidebar/50 rounded-xl" />
           </div>
         </div>
       </div>
@@ -162,7 +162,7 @@ export function RecentInvoices() {
   }
 
   return (
-    <div className="bg-white rounded-3xl border border-border-subtle shadow-sleek p-6">
+    <div className="bg-card rounded-3xl border border-border-subtle dark:shadow-dark-sleek p-6">
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
@@ -191,7 +191,7 @@ export function RecentInvoices() {
       ) : (
         /* Empty State */
         <div className="py-8 text-center">
-          <div className="w-12 h-12 mx-auto mb-3 rounded-2xl bg-gray-50 flex items-center justify-center">
+          <div className="w-12 h-12 mx-auto mb-3 rounded-2xl bg-sidebar flex items-center justify-center border border-border-subtle">
             <FileText size={20} className="text-muted" />
           </div>
           <p className="text-sm text-muted font-medium">

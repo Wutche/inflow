@@ -1,6 +1,7 @@
 "use client";
 
 import { WalletProvider } from "@/context/WalletContext";
+import { ThemeProvider } from "@/components/ThemeProvider";
 import { ReactNode } from "react";
 
 interface ProvidersProps {
@@ -8,5 +9,9 @@ interface ProvidersProps {
 }
 
 export function Providers({ children }: ProvidersProps) {
-  return <WalletProvider>{children}</WalletProvider>;
+  return (
+    <ThemeProvider attribute="data-theme" defaultTheme="system" enableSystem>
+      <WalletProvider>{children}</WalletProvider>
+    </ThemeProvider>
+  );
 }

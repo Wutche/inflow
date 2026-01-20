@@ -14,6 +14,8 @@ import {
 } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import { useWallet } from "@/context/WalletContext";
+import { ThemeToggle } from "@/components/ui/ThemeToggle";
+import { useNotifications } from "@/hooks/useNotifications";
 import { motion, AnimatePresence } from "framer-motion";
 
 interface DashboardHeaderProps {
@@ -43,6 +45,9 @@ export function DashboardHeader({
     disconnectStacks,
     disconnectAll,
   } = useWallet();
+
+  // Get notification data
+  const { unreadCount, hasUnread } = useNotifications();
 
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [copiedAddress, setCopiedAddress] = useState<"eth" | "stx" | null>(
@@ -89,7 +94,7 @@ export function DashboardHeader({
       <div className="flex items-center gap-4">
         <button
           onClick={onSearch}
-          className="p-2.5 rounded-xl text-muted hover:bg-white hover:text-brand-orange hover:shadow-sm border border-transparent hover:border-border-subtle transition-all cursor-pointer group"
+          className="p-2.5 rounded-xl text-muted hover:bg-sidebar-hover hover:text-brand-orange border border-transparent hover:border-border-subtle transition-all cursor-pointer group"
         >
           <Search
             size={20}
@@ -99,20 +104,26 @@ export function DashboardHeader({
 
         <button
           onClick={onNotifications}
-          className="p-2.5 rounded-xl text-muted hover:bg-white hover:text-brand-orange hover:shadow-sm border border-transparent hover:border-border-subtle transition-all relative cursor-pointer group"
+          className="p-2.5 rounded-xl text-muted hover:bg-sidebar-hover hover:text-brand-orange border border-transparent hover:border-border-subtle transition-all relative cursor-pointer group"
         >
           <Bell
             size={20}
             className="group-hover:rotate-12 transition-transform"
           />
-          <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-brand-orange rounded-full border-2 border-white ring-4 ring-brand-orange/10 animate-pulse" />
+          {hasUnread && (
+            <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 bg-brand-orange text-white text-[10px] font-bold rounded-full flex items-center justify-center border-2 border-background">
+              {unreadCount > 9 ? "9+" : unreadCount}
+            </span>
+          )}
         </button>
+
+        <ThemeToggle />
 
         {isConnected ? (
           <div className="relative" ref={dropdownRef}>
             <button
               onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-              className="px-4 py-2.5 bg-black text-white rounded-xl font-bold hover:bg-black/90 transition-all shadow-xl shadow-black/10 flex items-center gap-2.5 cursor-pointer active:scale-95"
+              className="px-4 py-2.5 bg-black text-white rounded-xl font-bold hover:bg-black/90 transition-all flex items-center gap-2.5 cursor-pointer active:scale-95 dark:shadow-xl dark:shadow-black/10"
             >
               {connectedCount === 2 ? (
                 <div className="flex -space-x-1">
@@ -154,7 +165,7 @@ export function DashboardHeader({
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   exit={{ opacity: 0, y: 8, scale: 0.96 }}
                   transition={{ duration: 0.15 }}
-                  className="absolute right-0 top-full mt-2 w-72 bg-white rounded-2xl shadow-2xl shadow-black/10 border border-gray-100 overflow-hidden z-50"
+                  className="absolute right-0 top-full mt-2 w-72 bg-card rounded-2xl border border-border-subtle overflow-hidden z-50 transition-all duration-300 dark:shadow-2xl dark:shadow-black/10"
                 >
                   {/* Connected Wallets Section */}
                   <div className="p-4 space-y-3">
@@ -164,7 +175,7 @@ export function DashboardHeader({
 
                     {/* Ethereum Wallet */}
                     {ethConnected && ethAddress && (
-                      <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
+                      <div className="flex items-center gap-3 p-3 bg-sidebar/50 rounded-xl border border-border-subtle/50">
                         <Image
                           src="https://cryptologos.cc/logos/ethereum-eth-logo.png"
                           alt="ETH"
@@ -184,7 +195,7 @@ export function DashboardHeader({
                         <div className="flex items-center gap-1">
                           <button
                             onClick={() => handleCopyAddress(ethAddress, "eth")}
-                            className="p-1.5 rounded-lg hover:bg-white text-muted hover:text-foreground transition-colors cursor-pointer"
+                            className="p-1.5 rounded-lg hover:bg-card text-muted hover:text-foreground transition-colors cursor-pointer"
                           >
                             {copiedAddress === "eth" ? (
                               <Check size={12} className="text-green-500" />
@@ -194,7 +205,7 @@ export function DashboardHeader({
                           </button>
                           <button
                             onClick={disconnectEthereum}
-                            className="p-1.5 rounded-lg hover:bg-red-50 text-muted hover:text-red-500 transition-colors cursor-pointer"
+                            className="p-1.5 rounded-lg hover:bg-orange-500/10 text-muted hover:text-red-500 transition-colors cursor-pointer"
                           >
                             <LogOut size={12} />
                           </button>
@@ -204,7 +215,7 @@ export function DashboardHeader({
 
                     {/* Stacks Wallet */}
                     {stacksConnected && stacksAddress && (
-                      <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
+                      <div className="flex items-center gap-3 p-3 bg-sidebar/50 rounded-xl border border-border-subtle/50">
                         <Image
                           src="https://cryptologos.cc/logos/stacks-stx-logo.png"
                           alt="STX"
@@ -226,7 +237,7 @@ export function DashboardHeader({
                             onClick={() =>
                               handleCopyAddress(stacksAddress, "stx")
                             }
-                            className="p-1.5 rounded-lg hover:bg-white text-muted hover:text-foreground transition-colors cursor-pointer"
+                            className="p-1.5 rounded-lg hover:bg-card text-muted hover:text-foreground transition-colors cursor-pointer"
                           >
                             {copiedAddress === "stx" ? (
                               <Check size={12} className="text-green-500" />
@@ -236,7 +247,7 @@ export function DashboardHeader({
                           </button>
                           <button
                             onClick={disconnectStacks}
-                            className="p-1.5 rounded-lg hover:bg-red-50 text-muted hover:text-red-500 transition-colors cursor-pointer"
+                            className="p-1.5 rounded-lg hover:bg-orange-500/10 text-muted hover:text-red-500 transition-colors cursor-pointer"
                           >
                             <LogOut size={12} />
                           </button>
@@ -246,11 +257,11 @@ export function DashboardHeader({
                   </div>
 
                   {/* Menu Items */}
-                  <div className="p-2 border-t border-gray-50">
+                  <div className="p-2 border-t border-border-subtle">
                     <Link
                       href="/dashboard/settings"
                       onClick={() => setIsDropdownOpen(false)}
-                      className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-gray-50 text-muted hover:text-foreground transition-colors cursor-pointer"
+                      className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-sidebar-hover text-muted hover:text-foreground transition-colors cursor-pointer"
                     >
                       <ArrowRight size={16} />
                       <span className="text-sm font-medium">Profile</span>
@@ -260,7 +271,7 @@ export function DashboardHeader({
                         setIsDropdownOpen(false);
                         disconnectAll();
                       }}
-                      className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-red-50 text-muted hover:text-red-600 transition-colors cursor-pointer text-left"
+                      className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-orange-500/10 text-muted hover:text-red-600 transition-colors cursor-pointer text-left"
                     >
                       <LogOut size={16} />
                       <span className="text-sm font-medium">
@@ -275,7 +286,7 @@ export function DashboardHeader({
         ) : (
           <button
             onClick={onConnect}
-            className="px-8 py-2.5 bg-black text-white rounded-xl font-bold hover:bg-black/90 transition-all shadow-xl shadow-black/10 flex items-center gap-2 cursor-pointer active:scale-95"
+            className="px-8 py-2.5 bg-black text-white rounded-xl font-bold hover:bg-black/90 transition-all flex items-center gap-2 cursor-pointer active:scale-95 dark:shadow-xl dark:shadow-black/10"
           >
             <Wallet size={16} />
             <span>Connect</span>

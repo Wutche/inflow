@@ -56,10 +56,10 @@ export function BridgeDetailModal({
           {/* Modal Container */}
           <div className="fixed inset-0 flex items-center justify-center z-151 pointer-events-none p-4">
             <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 10 }}
+              initial={{ opacity: 0, scale: 0.96, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 10 }}
-              className="w-full max-w-md bg-white border border-border-subtle rounded-[32px] overflow-hidden shadow-2xl pointer-events-auto relative"
+              exit={{ opacity: 0, scale: 0.96, y: 20 }}
+              className="w-full max-w-md bg-card border border-border-subtle rounded-[32px] overflow-hidden pointer-events-auto relative dark:shadow-dark-sleek"
             >
               {/* Close Button */}
               <button
@@ -116,8 +116,8 @@ export function BridgeDetailModal({
                     isConfirmed={true}
                   />
                   <div className="ml-4 h-6 border-l-2 border-dashed border-gray-100 relative">
-                    <div className="absolute top-1/2 -left-[9px] -translate-y-1/2 w-4 h-4 rounded-full bg-white border border-border-subtle flex items-center justify-center">
-                      <Zap size={8} className="text-brand-orange" />
+                    <div className="absolute top-1/2 -left-[9px] -translate-y-1/2 w-4 h-4 rounded-full bg-card border border-border-subtle flex items-center justify-center">
+                      <div className="w-1.5 h-1.5 rounded-full bg-brand-orange" />
                     </div>
                   </div>
                   <FlowStep
@@ -189,7 +189,7 @@ function FlowStep({
     <div className="flex items-start justify-between">
       <div className="flex items-center gap-3">
         <div
-          className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 ${isConfirmed ? "bg-green-50 border border-green-100 shadow-sm" : "bg-sidebar border border-border-subtle"}`}
+          className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 ${isConfirmed ? "bg-green-50 border border-green-100" : "bg-sidebar border border-border-subtle"}`}
         >
           {isConfirmed ? (
             <CheckCircle2 size={16} className="text-green-600" />
