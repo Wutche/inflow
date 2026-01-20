@@ -14,7 +14,6 @@ import {
 import Image from "next/image";
 import { useBridge } from "@/hooks/useBridge";
 import { useBridgeHistory } from "@/hooks/useBridgeHistory";
-import { useNotifications } from "@/hooks/useNotifications";
 import type { BridgeDirection } from "@/lib/bridge-utils";
 
 // ============================================================================
@@ -127,21 +126,21 @@ function SuccessModal({
             transition={{ type: "spring", damping: 25, stiffness: 300 }}
             className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-full max-w-md"
           >
-            <div className="bg-card rounded-3xl p-8 mx-4 border border-border-subtle dark:shadow-2xl">
+            <div className="bg-white rounded-3xl p-8 shadow-2xl mx-4">
               {/* Success Icon */}
               <div className="flex justify-center mb-6">
                 <motion.div
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
                   transition={{ type: "spring", delay: 0.2 }}
-                  className="w-20 h-20 rounded-full bg-linear-to-br from-green-400 to-green-600 flex items-center justify-center dark:shadow-lg dark:shadow-green-500/30"
+                  className="w-20 h-20 rounded-full bg-gradient-to-br from-green-400 to-green-600 flex items-center justify-center shadow-lg shadow-green-500/30"
                 >
                   <Check size={40} className="text-white" strokeWidth={3} />
                 </motion.div>
               </div>
 
               {/* Title */}
-              <h3 className="text-2xl font-bold text-center mb-2 text-foreground">
+              <h3 className="text-2xl font-bold text-center mb-2">
                 Bridge Successful!
               </h3>
               <p className="text-muted text-center text-sm mb-6">
@@ -149,7 +148,7 @@ function SuccessModal({
               </p>
 
               {/* Transaction ID */}
-              <div className="bg-sidebar rounded-2xl p-4 mb-6">
+              <div className="bg-gray-50 rounded-2xl p-4 mb-6">
                 <p className="text-[10px] uppercase tracking-widest font-bold text-muted mb-2">
                   Transaction ID
                 </p>
@@ -168,9 +167,9 @@ function SuccessModal({
               </div>
 
               {/* Close Button */}
-               <button
+              <button
                 onClick={onClose}
-                className="w-full py-4 bg-black text-white rounded-2xl font-bold hover:bg-black/90 transition-colors flex items-center justify-center gap-2 dark:bg-white dark:text-black dark:hover:bg-white/90"
+                className="w-full py-4 bg-black text-white rounded-2xl font-bold hover:bg-black/90 transition-colors flex items-center justify-center gap-2"
               >
                 <span>Close</span>
               </button>
@@ -227,9 +226,6 @@ export function BridgePaymentCard() {
   // Bridge history hook
   const { addTransaction } = useBridgeHistory();
 
-  // Notifications hook
-  const { addNotification } = useNotifications();
-
   // Track if we've already processed this success to avoid double-adding
   const processedTxRef = useRef<string | null>(null);
 
@@ -247,22 +243,11 @@ export function BridgePaymentCard() {
           amount,
           recipientAddress: recipient,
         });
-        
-        // Create notification for the bridge transaction
-        const routeText = direction === "eth-to-stacks" 
-          ? "Ethereum → Stacks" 
-          : "Stacks → Ethereum";
-        addNotification(
-          "bridge_pending",
-          "Bridge Initiated",
-          `Bridging $${amount} USDC ${routeText}`
-        );
-        
         // eslint-disable-next-line -- Intentional: show modal when external hook reports success
         setSavedTxHash(txHash);
       }
     }
-  }, [status, txHash, amount, recipient, direction, addTransaction, addNotification]);
+  }, [status, txHash, amount, recipient, direction, addTransaction]);
 
   // Handle modal close
   const handleCloseModal = useCallback(() => {
@@ -431,11 +416,11 @@ export function BridgePaymentCard() {
       <motion.div
         initial={{ opacity: 0, x: -20 }}
         animate={{ opacity: 1, x: 0 }}
-        className="bg-card border border-border-subtle rounded-[32px] p-8 dark:shadow-dark-sleek relative overflow-hidden flex flex-col transition-all duration-300"
+        className="bg-white border border-border-subtle rounded-[32px] p-8 shadow-sm relative overflow-hidden flex flex-col"
       >
         {/* Header */}
         <div className="mb-8">
-          <h2 className="text-xl font-bold tracking-tight mb-1 text-foreground">
+          <h2 className="text-xl font-bold tracking-tight mb-1">
             Send Payment
           </h2>
           <p className="text-muted text-xs font-medium">
@@ -453,7 +438,7 @@ export function BridgePaymentCard() {
               </div>
               <div className="flex items-center justify-center gap-3 py-2.5 px-4">
                 <div
-                  className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${fromConfig.bgColor} ring-1 ring-border-subtle`}
+                  className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${fromConfig.bgColor} ring-1 ring-[${fromConfig.color}]/20`}
                 >
                   <Image
                     src={fromConfig.logo}
@@ -463,7 +448,7 @@ export function BridgePaymentCard() {
                     unoptimized
                   />
                 </div>
-                <span className="text-xs font-bold tracking-tight text-foreground">
+                <span className="text-xs font-bold tracking-tight">
                   {fromConfig.name}
                 </span>
               </div>
@@ -473,7 +458,7 @@ export function BridgePaymentCard() {
             <button
               onClick={handleSwitchNetworks}
               disabled={isLoading}
-              className="w-8 h-8 rounded-full bg-card border border-border-subtle flex items-center justify-center hover:bg-sidebar-hover transition-all cursor-pointer group z-10 mt-6 disabled:opacity-50 disabled:cursor-not-allowed dark:shadow-sm"
+              className="w-8 h-8 rounded-full bg-white border border-border-subtle shadow-sm flex items-center justify-center hover:bg-gray-50 transition-all cursor-pointer group z-10 mt-6 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <ArrowLeftRight
                 size={14}
@@ -488,7 +473,7 @@ export function BridgePaymentCard() {
               </div>
               <div className="flex items-center justify-center gap-3 py-2.5 px-4">
                 <div
-                  className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${toConfig.bgColor} ring-1 ring-border-subtle`}
+                  className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${toConfig.bgColor} ring-1 ring-[${toConfig.color}]/20`}
                 >
                   <Image
                     src={toConfig.logo}
@@ -498,7 +483,7 @@ export function BridgePaymentCard() {
                     unoptimized
                   />
                 </div>
-                <span className="text-xs font-bold tracking-tight text-foreground">
+                <span className="text-xs font-bold tracking-tight">
                   {toConfig.name}
                 </span>
               </div>
@@ -523,7 +508,7 @@ export function BridgePaymentCard() {
                 value={amount}
                 onChange={(e) => handleAmountChange(e.target.value)}
                 disabled={isLoading}
-                className={`w-full pl-8 pr-16 py-3 bg-sidebar border rounded-xl text-xl font-bold text-foreground focus:outline-none focus:ring-2 focus:ring-brand-orange/20 transition-all disabled:opacity-50 ${
+                className={`w-full pl-8 pr-16 py-3 bg-sidebar border rounded-xl text-lg font-bold focus:outline-none focus:ring-2 focus:ring-brand-orange/20 transition-all disabled:opacity-50 ${
                   amountError ? "border-red-300" : "border-border-subtle"
                 }`}
               />
@@ -549,7 +534,7 @@ export function BridgePaymentCard() {
               value={recipient}
               onChange={(e) => handleRecipientChange(e.target.value)}
               disabled={isLoading}
-              className={`w-full px-4 py-3 bg-sidebar border rounded-xl text-xs font-mono font-bold text-foreground focus:outline-none focus:ring-2 focus:ring-brand-orange/20 transition-all disabled:opacity-50 ${
+              className={`w-full px-4 py-3 bg-sidebar border rounded-xl text-xs font-mono font-bold focus:outline-none focus:ring-2 focus:ring-brand-orange/20 transition-all disabled:opacity-50 ${
                 addressError ? "border-red-300" : "border-border-subtle"
               }`}
             />
@@ -586,7 +571,7 @@ export function BridgePaymentCard() {
                 className="bg-red-50 border border-red-100 rounded-xl p-4 flex items-center gap-3"
               >
                 <AlertTriangle size={14} className="text-red-500 shrink-0" />
-                <p className="text-[10px] font-bold text-red-600 dark:text-red-400">{error}</p>
+                <p className="text-[10px] font-bold text-red-600">{error}</p>
               </motion.div>
             )}
           </AnimatePresence>
@@ -595,14 +580,14 @@ export function BridgePaymentCard() {
           <button
             onClick={handleSubmit}
             disabled={isDisabled}
-            className={`w-full py-4 rounded-2xl font-bold flex items-center justify-center gap-3 transition-all group cursor-pointer mt-4 disabled:opacity-50 disabled:cursor-not-allowed dark:shadow-xl ${
+            className={`w-full py-4 rounded-2xl font-bold flex items-center justify-center gap-3 transition-all shadow-xl group cursor-pointer mt-4 disabled:opacity-50 disabled:cursor-not-allowed ${
               status === "success"
-                ? "bg-green-500 text-white dark:shadow-green-500/20"
+                ? "bg-green-500 text-white shadow-green-500/20"
                 : status === "error"
-                  ? "bg-red-500 text-white dark:shadow-red-500/20"
-                  : (fromNetwork === "Stacks" || (fromNetwork === "Ethereum" && needsApproval) || status === "approving")
-                    ? "bg-linear-to-r from-brand-orange to-orange-400 text-white dark:shadow-brand-orange/20"
-                    : "bg-black text-white dark:shadow-black/10 hover:bg-black/90 dark:bg-white dark:text-black dark:hover:bg-white/90"
+                  ? "bg-red-500 text-white shadow-red-500/20"
+                  : isLoading
+                    ? "bg-gradient-to-r from-brand-orange to-orange-400 text-white shadow-brand-orange/20"
+                    : "bg-black text-white shadow-black/10 hover:bg-black/90"
             }`}
           >
             {buttonContent.icon && (

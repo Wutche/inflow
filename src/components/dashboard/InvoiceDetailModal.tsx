@@ -79,16 +79,16 @@ export function InvoiceDetailModal({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="fixed inset-0 bg-overlay/40 backdrop-blur-sm z-150 cursor-pointer"
+            className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[150] cursor-pointer"
           />
 
           {/* Modal Container */}
-          <div className="fixed inset-0 flex items-center justify-center z-151 pointer-events-none p-4">
+          <div className="fixed inset-0 flex items-center justify-center z-[151] pointer-events-none p-4">
             <motion.div
               initial={{ opacity: 0, scale: 0.95, y: 10 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 10 }}
-              className="w-full max-w-lg bg-card border border-border-subtle rounded-[32px] overflow-hidden pointer-events-auto relative dark:shadow-dark-sleek"
+              className="w-full max-w-lg bg-white border border-border-subtle rounded-[32px] overflow-hidden shadow-2xl pointer-events-auto relative"
             >
               {/* Close Button */}
               <button
@@ -185,7 +185,7 @@ export function InvoiceDetailModal({
                           }
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="w-full py-3 sm:py-4 bg-black text-white rounded-xl sm:rounded-2xl flex items-center justify-center gap-2 font-bold text-sm hover:bg-black/90 transition-all cursor-pointer dark:shadow-xl dark:shadow-black/10"
+                          className="w-full py-3 sm:py-4 bg-black text-white rounded-xl sm:rounded-2xl flex items-center justify-center gap-2 font-bold text-sm hover:bg-black/90 transition-all shadow-xl shadow-black/10 cursor-pointer"
                         >
                           View Transaction →
                         </a>
@@ -196,7 +196,7 @@ export function InvoiceDetailModal({
                       href={invoice.link}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="w-full py-3 sm:py-4 bg-black text-white rounded-xl sm:rounded-2xl flex items-center justify-center gap-2 font-bold text-sm hover:bg-black/90 transition-all dark:shadow-xl dark:shadow-black/10 cursor-pointer"
+                      className="w-full py-3 sm:py-4 bg-black text-white rounded-xl sm:rounded-2xl flex items-center justify-center gap-2 font-bold text-sm hover:bg-black/90 transition-all shadow-xl shadow-black/10 cursor-pointer"
                     >
                       Open Payment Link
                     </a>
@@ -205,8 +205,8 @@ export function InvoiceDetailModal({
               </div>
 
               {/* Sophisticated Glow */}
-              <div className="absolute -top-20 -right-20 w-64 h-64 bg-brand-orange/3 rounded-full blur-[100px] -z-10" />
-              <div className="absolute -bottom-20 -left-20 w-64 h-64 bg-brand-blue/3 rounded-full blur-[100px] -z-10" />
+              <div className="absolute -top-20 -right-20 w-64 h-64 bg-brand-orange/[0.03] rounded-full blur-[100px] -z-10" />
+              <div className="absolute -bottom-20 -left-20 w-64 h-64 bg-brand-blue/[0.03] rounded-full blur-[100px] -z-10" />
             </motion.div>
           </div>
         </>

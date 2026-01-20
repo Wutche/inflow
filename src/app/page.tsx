@@ -50,29 +50,25 @@ export default function LandingPage() {
 
   return (
     <>
-      <main className="min-h-screen  selection:bg-brand-orange selection:text-white overflow-x-hidden transition-colors duration-300">
+      <main className="min-h-screen selection:bg-brand-orange selection:text-white overflow-x-hidden">
         <Navbar />
 
         {/* Hero Section */}
         <section className="relative min-h-[90vh] flex items-center pt-32 pb-32 px-6 overflow-hidden">
           {/* Extreme-Contrast Logo-Inspired Mesh Background */}
-          <div className="absolute inset-0 -z-10 overflow-visible pointer-events-none">
-            {/* Orange gradient - top right */}
+          <div className="absolute inset-0 -z-10 overflow-hidden pointer-events-none">
             <div
-              className="absolute top-[-20%] right-[-10%] w-[1400px] h-[1400px] rounded-full"
+              className="absolute top-[-10%] right-[-5%] w-[1200px] h-[1200px] rounded-full opacity-50 blur-[130px]"
               style={{
                 background:
-                  "radial-gradient(circle, rgba(255, 138, 0, var(--mesh-opacity-orange-primary)) 0%, rgba(255, 180, 100, var(--mesh-opacity-orange-secondary)) 40%, transparent 70%)",
-                filter: "blur(100px)",
+                  "radial-gradient(circle, #FF8A00 0%, transparent 70%)",
               }}
             />
-            {/* Cyan/Teal gradient - bottom left */}
             <div
-              className="absolute bottom-[-30%] left-[-15%] w-[1600px] h-[1600px] rounded-full"
+              className="absolute bottom-[-10%] left-[-5%] w-[1200px] h-[1200px] rounded-full opacity-50 blur-[130px]"
               style={{
                 background:
-                  "radial-gradient(circle, rgba(0, 209, 255, var(--mesh-opacity-cyan-primary)) 0%, rgba(100, 220, 255, var(--mesh-opacity-cyan-secondary)) 40%, transparent 70%)",
-                filter: "blur(100px)",
+                  "radial-gradient(circle, #00D1FF 0%, transparent 70%)",
               }}
             />
           </div>
@@ -120,16 +116,14 @@ export default function LandingPage() {
             >
               <button
                 onClick={() => setIsWalletModalOpen(true)}
-                className="flex items-center gap-2 px-8 py-4 rounded-2xl font-bold transition-all group scale-100 hover:scale-105 active:scale-95 cursor-pointer shadow-sm hover:shadow-md dark:bg-white dark:text-black"
-                style={{ backgroundColor: '#000000', color: '#ffffff' }}
+                className="w-full sm:w-auto px-8 py-4 bg-black text-white rounded-2xl font-medium hover:bg-black/90 transition-all flex items-center justify-center gap-2 shadow-xl shadow-black/10 cursor-pointer"
               >
                 <Wallet className="w-4 h-4" />
                 Connect Wallet
               </button>
               <Link
                 href="/dashboard"
-                className="w-full sm:w-auto px-8 py-4 border border-border-subtle rounded-2xl font-medium transition-all flex items-center justify-center gap-2 cursor-pointer shadow-sm hover:shadow-md dark:bg-white/5 dark:text-white dark:border-white/10 dark:hover:bg-white/10"
-                style={{ backgroundColor: '#ffffff', color: '#000000' }}
+                className="w-full sm:w-auto px-8 py-4 bg-white text-foreground border border-border-subtle rounded-2xl font-medium hover:bg-gray-50 transition-all flex items-center justify-center gap-2 cursor-pointer"
               >
                 Pay Invoice
                 <ArrowRight className="w-4 h-4" />
@@ -139,7 +133,7 @@ export default function LandingPage() {
         </section>
 
         {/* About Inflow Section */}
-        <section id="about" className="py-24 px-6 bg-sidebar transition-colors duration-300">
+        <section id="about" className="py-24 px-6 bg-sidebar">
           <div className="max-w-7xl mx-auto">
             <div className="grid lg:grid-cols-2 gap-16 items-center">
               <motion.div
@@ -161,7 +155,7 @@ export default function LandingPage() {
 
                 <div className="space-y-6">
                   <div className="flex gap-4">
-                    <div className="shrink-0 w-12 h-12 rounded-2xl bg-card border border-border-subtle flex items-center justify-center">
+                    <div className="shrink-0 w-12 h-12 rounded-2xl bg-white border border-border-subtle flex items-center justify-center shadow-sm">
                       <Database className="text-brand-orange w-6 h-6" />
                     </div>
                     <div>
@@ -173,7 +167,7 @@ export default function LandingPage() {
                     </div>
                   </div>
                   <div className="flex gap-4">
-                    <div className="shrink-0 w-12 h-12 rounded-2xl bg-card border border-border-subtle flex items-center justify-center">
+                    <div className="shrink-0 w-12 h-12 rounded-2xl bg-white border border-border-subtle flex items-center justify-center shadow-sm">
                       <ShieldCheck className="text-brand-blue w-6 h-6" />
                     </div>
                     <div>
@@ -194,8 +188,7 @@ export default function LandingPage() {
                 initial={{ opacity: 0, y: 10 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                className="relative p-12 rounded-[40px] bg-card border border-border-subtle allow-shadow dark:shadow-dark-sleek max-w-xl mx-auto transition-all"
-                style={{ boxShadow: '0 10px 30px -10px rgba(0, 0, 0, 0.08)' }}
+                className="relative p-12 rounded-[40px] bg-white border border-border-subtle shadow-2xl max-w-xl mx-auto"
               >
                 {/* Abstract Security Indicator */}
                 <div className="flex items-center gap-2 mb-12">
@@ -217,7 +210,7 @@ export default function LandingPage() {
                 </div>
 
                 {/* Security Proof Grid */}
-                <div className="grid grid-cols-2 gap-12 border-t border-border-subtle pt-10">
+                <div className="grid grid-cols-2 gap-12 border-t border-gray-100 pt-10">
                   <div>
                     <div className="text-[10px] font-bold text-muted uppercase mb-4">
                       Protocol Layer
@@ -245,7 +238,7 @@ export default function LandingPage() {
                 </div>
 
                 {/* Proof Marker */}
-                <div className="mt-8 pt-6 border-t border-border-subtle flex items-center justify-between opacity-50">
+                <div className="mt-8 pt-6 border-t border-gray-50 flex items-center justify-between opacity-50">
                   <div className="text-[9px] font-mono">HASH: 0x82f...d92a</div>
                   <div className="flex gap-1">
                     {[1, 2, 3, 4].map((i) => (
@@ -304,7 +297,7 @@ export default function LandingPage() {
         </section>
 
         {/* Basic Footer */}
-        <footer className="py-12 border-t border-border-subtle text-center bg-background transition-colors duration-300">
+        <footer className="py-12 border-t border-border-subtle text-center">
           <div className="flex items-center justify-center gap-2 mb-4">
             <div className="relative w-6 h-6">
               <Image
@@ -314,7 +307,7 @@ export default function LandingPage() {
                 className="object-contain"
               />
             </div>
-            <span className="text-sm font-bold tracking-tight text-foreground">Inflow</span>
+            <span className="text-sm font-bold tracking-tight">Inflow</span>
           </div>
           <p className="text-xs text-muted font-medium">
             © 2026 Inflow Protocol. All rights reserved.
@@ -340,7 +333,7 @@ function FeatureCard({ icon: Icon, title, description }: FeatureCardProps) {
   return (
     <motion.div
       variants={fadeInUp}
-      className="p-8 rounded-3xl bg-card border border-border-subtle hover:border-brand-orange/50 transition-all group cursor-pointer dark:shadow-dark-sleek"
+      className="p-8 rounded-3xl bg-white border border-border-subtle hover:border-brand-orange/50 transition-colors group cursor-pointer"
     >
       <div className="w-12 h-12 rounded-2xl bg-sidebar flex items-center justify-center mb-6 group-hover:bg-brand-orange/10 transition-colors">
         <Icon className="w-6 h-6 text-foreground group-hover:text-brand-orange transition-colors" />

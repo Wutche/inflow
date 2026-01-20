@@ -13,11 +13,10 @@ import {
 } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import { WalletModal } from "./WalletModal";
-import { ThemeToggle } from "./ui/ThemeToggle";
 import { useWallet } from "@/context/WalletContext";
 import { motion, AnimatePresence } from "framer-motion";
 
-export function Navbar({ hideNavLinks = false }: { hideNavLinks?: boolean }) {
+export function Navbar() {
   const [isWalletModalOpen, setIsWalletModalOpen] = useState(false);
   const {
     isConnected,
@@ -73,7 +72,7 @@ export function Navbar({ hideNavLinks = false }: { hideNavLinks?: boolean }) {
 
   return (
     <>
-      <nav className="fixed top-0 left-0 right-0 z-50 flex items-center justify-center p-6 bg-background backdrop-blur-md border-b border-border-subtle">
+      <nav className="fixed top-0 left-0 right-0 z-50 flex items-center justify-center p-6 bg-white/80 backdrop-blur-md border-b border-border-subtle">
         <div className="max-w-7xl w-full flex items-center justify-between px-4">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2 group">
@@ -90,27 +89,24 @@ export function Navbar({ hideNavLinks = false }: { hideNavLinks?: boolean }) {
             </span>
           </Link>
 
-          {/* Navigation Links - conditionally hidden */}
-          {!hideNavLinks && (
-            <div className="hidden md:flex items-center gap-8">
-              <Link
-                href="#about"
-                className="text-sm font-medium text-muted hover:text-brand-orange transition-colors"
-              >
-                How it Works
-              </Link>
-              <Link
-                href="#features"
-                className="text-sm font-medium text-muted hover:text-brand-orange transition-colors"
-              >
-                Features
-              </Link>
-            </div>
-          )}
+          {/* Navigation Links */}
+          <div className="hidden md:flex items-center gap-8">
+            <Link
+              href="#features"
+              className="text-sm font-medium text-muted hover:text-brand-orange transition-colors"
+            >
+              Features
+            </Link>
+            <Link
+              href="#about"
+              className="text-sm font-medium text-muted hover:text-brand-orange transition-colors"
+            >
+              How it Works
+            </Link>
+          </div>
 
           {/* CTA */}
           <div className="flex items-center gap-3">
-            <ThemeToggle />
             {isConnected ? (
               <>
                 {/* Go to Dashboard Link */}
@@ -181,8 +177,8 @@ export function Navbar({ hideNavLinks = false }: { hideNavLinks?: boolean }) {
                         initial={{ opacity: 0, y: 8, scale: 0.96 }}
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         exit={{ opacity: 0, y: 8, scale: 0.96 }}
-                         transition={{ duration: 0.15 }}
-                        className="absolute right-0 top-full mt-2 w-72 bg-card rounded-2xl border border-border-subtle overflow-hidden z-50 dark:shadow-2xl dark:shadow-black/10"
+                        transition={{ duration: 0.15 }}
+                        className="absolute right-0 top-full mt-2 w-72 bg-white rounded-2xl shadow-2xl shadow-black/10 border border-gray-100 overflow-hidden z-50"
                       >
                         {/* Connected Wallets */}
                         <div className="p-4 space-y-3">
@@ -192,7 +188,7 @@ export function Navbar({ hideNavLinks = false }: { hideNavLinks?: boolean }) {
 
                           {/* Ethereum Wallet */}
                           {ethConnected && ethAddress && (
-                            <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl dark:bg-sidebar">
+                            <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
                               <Image
                                 src="https://cryptologos.cc/logos/ethereum-eth-logo.png"
                                 alt="ETH"
@@ -214,7 +210,7 @@ export function Navbar({ hideNavLinks = false }: { hideNavLinks?: boolean }) {
                                   onClick={() =>
                                     handleCopyAddress(ethAddress, "eth")
                                   }
-                                  className="p-1.5 rounded-lg hover:bg-sidebar-hover text-muted hover:text-foreground transition-colors cursor-pointer"
+                                  className="p-1.5 rounded-lg hover:bg-white text-muted hover:text-foreground transition-colors cursor-pointer"
                                 >
                                   {copiedAddress === "eth" ? (
                                     <Check
@@ -237,7 +233,7 @@ export function Navbar({ hideNavLinks = false }: { hideNavLinks?: boolean }) {
 
                           {/* Stacks Wallet */}
                           {stacksConnected && stacksAddress && (
-                            <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl dark:bg-sidebar">
+                            <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
                               <Image
                                 src="https://cryptologos.cc/logos/stacks-stx-logo.png"
                                 alt="STX"
@@ -259,7 +255,7 @@ export function Navbar({ hideNavLinks = false }: { hideNavLinks?: boolean }) {
                                   onClick={() =>
                                     handleCopyAddress(stacksAddress, "stx")
                                   }
-                                  className="p-1.5 rounded-lg hover:bg-sidebar-hover text-muted hover:text-foreground transition-colors cursor-pointer"
+                                  className="p-1.5 rounded-lg hover:bg-white text-muted hover:text-foreground transition-colors cursor-pointer"
                                 >
                                   {copiedAddress === "stx" ? (
                                     <Check

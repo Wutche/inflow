@@ -183,12 +183,12 @@ export function WalletModal({ isOpen, onClose }: WalletModalProps) {
               initial={{ opacity: 0, scale: 0.95, y: 10 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 10 }}
-              className="w-full max-w-md bg-card border border-border-subtle rounded-[40px] overflow-hidden pointer-events-auto relative dark:shadow-dark-sleek"
+              className="w-full max-w-md bg-white border border-gray-100 rounded-[40px] overflow-hidden shadow-[0_24px_80px_rgba(0,0,0,0.08)] pointer-events-auto relative"
             >
               {/* Close Button */}
               <button
                 onClick={handleClose}
-                className="absolute top-8 right-8 p-2 rounded-full hover:bg-sidebar-hover transition-colors text-muted hover:text-foreground cursor-pointer"
+                className="absolute top-8 right-8 p-2 rounded-full hover:bg-gray-50 transition-colors text-muted hover:text-foreground cursor-pointer"
               >
                 <X size={20} />
               </button>
@@ -197,7 +197,7 @@ export function WalletModal({ isOpen, onClose }: WalletModalProps) {
               {viewState !== "main" && viewState !== "connect-second" && (
                 <button
                   onClick={handleBack}
-                  className="absolute top-8 left-8 p-2 rounded-full hover:bg-sidebar-hover transition-colors text-muted hover:text-foreground cursor-pointer flex items-center gap-1"
+                  className="absolute top-8 left-8 p-2 rounded-full hover:bg-gray-50 transition-colors text-muted hover:text-foreground cursor-pointer flex items-center gap-1"
                 >
                   <ChevronLeft size={20} />
                 </button>
@@ -223,15 +223,15 @@ export function WalletModal({ isOpen, onClose }: WalletModalProps) {
                       </div>
 
                       {/* Network Selector */}
-                      <div className="flex p-1.5 bg-sidebar rounded-2xl mb-10 border border-border-subtle">
+                      <div className="flex p-1.5 bg-gray-50 rounded-2xl mb-10 border border-gray-100">
                         <button
                           onClick={() => setSelectedNetwork("stacks")}
                           disabled={stacksConnected}
                           className={`flex-1 flex items-center justify-center gap-2 py-3.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                             stacksConnected
-                              ? "bg-green-50 text-green-700 ring-1 ring-green-200 dark:bg-green-900/20 dark:text-green-400 dark:ring-green-900/30"
+                              ? "bg-green-50 text-green-700 ring-1 ring-green-200"
                               : selectedNetwork === "stacks"
-                              ? "bg-card text-foreground ring-1 ring-border-subtle"
+                              ? "bg-white text-foreground shadow-sm ring-1 ring-gray-100"
                               : "text-muted hover:text-foreground/60"
                           }`}
                         >
@@ -253,9 +253,9 @@ export function WalletModal({ isOpen, onClose }: WalletModalProps) {
                           disabled={ethConnected}
                           className={`flex-1 flex items-center justify-center gap-2 py-3.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                             ethConnected
-                              ? "bg-green-50 text-green-700 ring-1 ring-green-200 dark:bg-green-900/20 dark:text-green-400 dark:ring-green-900/30"
+                              ? "bg-green-50 text-green-700 ring-1 ring-green-200"
                               : selectedNetwork === "ethereum"
-                              ? "bg-card text-foreground ring-1 ring-border-subtle"
+                              ? "bg-white text-foreground shadow-sm ring-1 ring-gray-100"
                               : "text-muted hover:text-foreground/60"
                           }`}
                         >
@@ -280,10 +280,10 @@ export function WalletModal({ isOpen, onClose }: WalletModalProps) {
                         <button
                           onClick={handleMainConnect}
                           disabled={isConnecting}
-                          className={`w-full py-5 rounded-2xl font-bold flex items-center justify-center gap-3 transition-all hover:scale-[1.01] active:scale-[0.99] cursor-pointer disabled:opacity-70 disabled:cursor-not-allowed dark:shadow-xl ${
+                          className={`w-full py-5 rounded-2xl font-bold flex items-center justify-center gap-3 transition-all hover:scale-[1.01] active:scale-[0.99] cursor-pointer shadow-xl disabled:opacity-70 disabled:cursor-not-allowed ${
                             selectedNetwork === "stacks"
-                              ? "bg-foreground text-background hover:opacity-90 dark:shadow-foreground/10"
-                              : "bg-[#627EEA] text-white hover:bg-[#627EEA]/90 dark:shadow-[#627EEA]/20"
+                              ? "bg-black text-white hover:bg-black/90 shadow-black/10"
+                              : "bg-[#627EEA] text-white hover:bg-[#627EEA]/90 shadow-[#627EEA]/20"
                           }`}
                         >
                           {isConnecting ? (
@@ -293,7 +293,7 @@ export function WalletModal({ isOpen, onClose }: WalletModalProps) {
                             </>
                           ) : (
                             <>
-                              <div className="w-7 h-7 rounded-lg bg-foreground/10 flex items-center justify-center">
+                              <div className="w-7 h-7 rounded-lg bg-white/10 flex items-center justify-center">
                                 <Wallet size={16} />
                               </div>
                               <span className="text-sm">
@@ -325,7 +325,7 @@ export function WalletModal({ isOpen, onClose }: WalletModalProps) {
                       </div>
 
                       {/* Footer Info */}
-                      <p className="mt-10 pt-8 border-t border-border-subtle text-center text-[10px] text-muted leading-relaxed font-medium">
+                      <p className="mt-10 pt-8 border-t border-gray-50 text-center text-[10px] text-muted leading-relaxed font-medium">
                         By connecting, you agree to our{" "}
                         <span className="text-foreground cursor-pointer hover:underline">
                           Terms of Service
@@ -346,7 +346,7 @@ export function WalletModal({ isOpen, onClose }: WalletModalProps) {
                       className="text-center"
                     >
                       {/* Success Icon */}
-                      <div className="w-16 h-16 mx-auto mb-6 rounded-full bg-green-500/10 flex items-center justify-center border border-green-500/20">
+                      <div className="w-16 h-16 mx-auto mb-6 rounded-full bg-green-50 flex items-center justify-center">
                         <Check className="w-8 h-8 text-green-500" />
                       </div>
 
@@ -363,10 +363,6 @@ export function WalletModal({ isOpen, onClose }: WalletModalProps) {
                           : ethTruncatedAddress}
                       </p>
 
-                      <div className="flex gap-4">
-                  <span className="flex items-center gap-1.5"><kbd className="px-1.5 py-0.5 bg-sidebar border border-border-subtle rounded-md">↵</kbd> to select</span>
-                  <span className="flex items-center gap-1.5"><kbd className="px-1.5 py-0.5 bg-sidebar border border-border-subtle rounded-md">↑↓</kbd> to navigate</span>
-                </div>
                       {/* Prompt for second wallet */}
                       <div className="bg-brand-orange/5 border border-brand-orange/20 rounded-2xl p-6 my-8">
                         <div className="flex items-center justify-center gap-3 mb-4">
@@ -397,7 +393,7 @@ export function WalletModal({ isOpen, onClose }: WalletModalProps) {
                           disabled={isConnecting}
                           className={`w-full py-4 rounded-xl font-bold flex items-center justify-center gap-2 transition-all cursor-pointer disabled:opacity-70 ${
                             otherNetwork === "stacks"
-                              ? "bg-foreground text-background hover:opacity-90 dark:shadow-foreground/10"
+                              ? "bg-black text-white hover:bg-black/90"
                               : "bg-[#627EEA] text-white hover:bg-[#627EEA]/90"
                           }`}
                         >
@@ -455,9 +451,9 @@ export function WalletModal({ isOpen, onClose }: WalletModalProps) {
                             key={wallet.id}
                             onClick={() => handleWalletOptionConnect()}
                             disabled={isConnecting}
-                            className="w-full p-4 rounded-2xl border border-border-subtle hover:border-brand-orange/50 hover:bg-sidebar-hover transition-all flex items-center gap-4 cursor-pointer group disabled:opacity-70 dark:bg-sidebar/30"
+                            className="w-full p-4 rounded-2xl border border-gray-100 hover:border-brand-orange/50 hover:bg-gray-50/50 transition-all flex items-center gap-4 cursor-pointer group disabled:opacity-70"
                           >
-                            <div className="w-12 h-12 rounded-xl bg-sidebar border border-border-subtle flex items-center justify-center overflow-hidden group-hover:bg-brand-orange/10 transition-colors">
+                            <div className="w-12 h-12 rounded-xl bg-gray-50 flex items-center justify-center overflow-hidden group-hover:bg-brand-orange/10 transition-colors">
                               <Image
                                 src={wallet.icon}
                                 alt={wallet.name}
@@ -486,7 +482,7 @@ export function WalletModal({ isOpen, onClose }: WalletModalProps) {
                       </div>
 
                       {/* Footer Info */}
-                      <p className="mt-8 pt-6 border-t border-border-subtle text-center text-[10px] text-muted leading-relaxed font-medium">
+                      <p className="mt-8 pt-6 border-t border-gray-50 text-center text-[10px] text-muted leading-relaxed font-medium">
                         Don&apos;t have a wallet?{" "}
                         <span className="text-brand-orange cursor-pointer hover:underline">
                           Learn how to get one

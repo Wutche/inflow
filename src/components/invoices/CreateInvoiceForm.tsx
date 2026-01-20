@@ -10,15 +10,10 @@ import {
   User,
   DollarSign,
   MessageSquare,
-  Mail,
-  Send,
-  Loader2,
 } from "lucide-react";
 import QRCode from "qrcode";
 import { createPaymentUrl, InvoiceInput, InvoiceSchema } from "@/lib/url-state";
 import { useInvoiceHistory } from "@/hooks/useInvoiceHistory";
-import { useNotifications } from "@/hooks/useNotifications";
-import { sendInvoiceEmail, isValidEmail } from "@/lib/email";
 
 interface FormErrors {
   recipient?: string;
@@ -44,17 +39,8 @@ export function CreateInvoiceForm() {
   const [copied, setCopied] = useState(false);
   const [errors, setErrors] = useState<FormErrors>({});
 
-  // Email state
-  const [clientEmail, setClientEmail] = useState("");
-  const [isSendingEmail, setIsSendingEmail] = useState(false);
-  const [emailSent, setEmailSent] = useState(false);
-  const [emailError, setEmailError] = useState<string | null>(null);
-
   // History hook for persisting generated invoices
   const { saveInvoice } = useInvoiceHistory();
-  
-  // Notifications hook
-  const { addNotification } = useNotifications();
 
   /**
    * Get placeholder text based on network selection.
@@ -148,16 +134,9 @@ export function CreateInvoiceForm() {
       network,
     });
 
-    // Create notification for the new invoice
-    addNotification(
-      "invoice_created",
-      "Invoice Created",
-      `New invoice for $${amount} ${token} has been generated`
-    );
-
     setGeneratedLink(paymentUrl);
     setCopied(false);
-  }, [recipient, amount, memo, token, network, validateForm, saveInvoice, addNotification]);
+  }, [recipient, amount, memo, token, network, validateForm, saveInvoice]);
 
   /**
    * Copies the generated link to clipboard.
@@ -191,53 +170,8 @@ export function CreateInvoiceForm() {
     }
   };
 
-  /**
-   * Sends the invoice via email to the client.
-   */
-  const sendEmail = useCallback(async () => {
-    if (!generatedLink || !clientEmail) return;
-
-    // Validate email
-    if (!isValidEmail(clientEmail)) {
-      setEmailError("Please enter a valid email address");
-      return;
-    }
-
-    setIsSendingEmail(true);
-    setEmailError(null);
-    setEmailSent(false);
-
-    const result = await sendInvoiceEmail({
-      to_email: clientEmail,
-      amount,
-      token,
-      recipient,
-      network,
-      pay_link: generatedLink,
-      memo: memo || undefined,
-    });
-
-    setIsSendingEmail(false);
-
-    if (result.success) {
-      setEmailSent(true);
-      addNotification(
-        "invoice_sent",
-        "Invoice Sent",
-        `Invoice emailed to ${clientEmail}`
-      );
-      // Reset after 3 seconds
-      setTimeout(() => {
-        setEmailSent(false);
-        setClientEmail("");
-      }, 3000);
-    } else {
-      setEmailError(result.message);
-    }
-  }, [generatedLink, clientEmail, amount, token, recipient, network, memo, addNotification]);
-
   return (
-    <div className="bg-white rounded-3xl border border-border-subtle p-8 max-w-xl mx-auto dark:bg-card">
+    <div className="bg-white rounded-3xl border border-border-subtle shadow-sleek p-8 max-w-xl mx-auto">
       {/* Header */}
       <div className="flex items-center gap-3 mb-8">
         <div className="w-12 h-12 rounded-2xl bg-brand-orange/10 flex items-center justify-center">
@@ -453,76 +387,6 @@ export function CreateInvoiceForm() {
                 <p className="text-xs text-muted mt-2">Scan to pay</p>
               </div>
             )}
-
-            {/* Email Invoice Section */}
-            <div className="mt-6 pt-6 border-t border-border-subtle">
-              <div className="flex items-center gap-2 mb-3">
-                <Mail size={14} className="text-muted" />
-                <span className="text-xs font-bold text-muted uppercase tracking-wider">
-                  Send via Email
-                </span>
-              </div>
-              
-              <div className="flex gap-2">
-                <div className="flex-1 relative">
-                  <input
-                    type="email"
-                    value={clientEmail}
-                    onChange={(e) => {
-                      setClientEmail(e.target.value);
-                      setEmailError(null);
-                    }}
-                    placeholder="client@email.com"
-                    disabled={isSendingEmail || emailSent}
-                    className={`w-full px-4 py-3 rounded-xl border text-sm ${
-                      emailError 
-                        ? "border-red-500" 
-                        : emailSent 
-                          ? "border-green-500 bg-green-50"
-                          : "border-border-subtle"
-                    } bg-white dark:bg-card focus:outline-none focus:ring-2 focus:ring-brand-orange/20 transition-all disabled:opacity-50`}
-                  />
-                </div>
-                <motion.button
-                  whileHover={{ scale: isSendingEmail || emailSent ? 1 : 1.02 }}
-                  whileTap={{ scale: isSendingEmail || emailSent ? 1 : 0.98 }}
-                  onClick={sendEmail}
-                  disabled={!clientEmail || isSendingEmail || emailSent}
-                  className={`px-5 py-3 rounded-xl font-bold flex items-center gap-2 transition-colors cursor-pointer ${
-                    emailSent
-                      ? "bg-green-500 text-white"
-                      : "bg-black text-white hover:bg-black/90 dark:bg-white dark:text-black dark:hover:bg-white/90"
-                  } disabled:opacity-50 disabled:cursor-not-allowed`}
-                >
-                  {isSendingEmail ? (
-                    <>
-                      <Loader2 size={16} className="animate-spin" />
-                      <span className="hidden sm:inline">Sending...</span>
-                    </>
-                  ) : emailSent ? (
-                    <>
-                      <Check size={16} />
-                      <span className="hidden sm:inline">Sent!</span>
-                    </>
-                  ) : (
-                    <>
-                      <Send size={16} />
-                      <span className="hidden sm:inline">Send</span>
-                    </>
-                  )}
-                </motion.button>
-              </div>
-              
-              {emailError && (
-                <p className="mt-2 text-xs text-red-500">{emailError}</p>
-              )}
-              
-              {emailSent && (
-                <p className="mt-2 text-xs text-green-600">
-                  ✓ Invoice sent to {clientEmail}
-                </p>
-              )}
-            </div>
           </motion.div>
         )}
       </div>

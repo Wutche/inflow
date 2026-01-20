@@ -39,10 +39,10 @@ export default function PayPage() {
 function PayPageSkeleton() {
   return (
     <main className="min-h-screen">
-      <Navbar hideNavLinks />
+      <Navbar />
       <div className="pt-32 pb-16 px-6">
         <div className="max-w-lg mx-auto">
-          <div className="bg-white rounded-3xl border border-border-subtle p-8 animate-pulse dark:bg-card">
+          <div className="bg-white rounded-3xl border border-border-subtle shadow-sleek p-8 animate-pulse">
             <div className="h-8 bg-gray-200 rounded w-3/4 mb-4" />
             <div className="h-4 bg-gray-200 rounded w-1/2 mb-8" />
             <div className="space-y-4">
@@ -79,13 +79,13 @@ function PayPageContent() {
 function InvalidInvoiceUI() {
   return (
     <main className="min-h-screen">
-      <Navbar hideNavLinks />
+      <Navbar />
       <div className="pt-32 pb-16 px-6">
         <div className="max-w-lg mx-auto text-center">
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="bg-white rounded-3xl border border-border-subtle p-8 dark:bg-card dark:shadow-dark-sleek"
+            className="bg-white rounded-3xl border border-border-subtle shadow-sleek p-8"
           >
             {/* Error Icon */}
             <div className="w-16 h-16 mx-auto mb-6 rounded-2xl bg-red-50 flex items-center justify-center">
@@ -218,13 +218,13 @@ function ValidInvoiceUI({ data }: { data: InvoiceData }) {
   if (paymentStatus === "success") {
     return (
       <main className="min-h-screen">
-        <Navbar hideNavLinks />
+        <Navbar />
         <div className="pt-32 pb-16 px-6">
           <div className="max-w-lg mx-auto">
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
-              className="bg-white rounded-3xl border border-border-subtle p-8 text-center dark:bg-card dark:shadow-dark-sleek"
+              className="bg-white rounded-3xl border border-border-subtle shadow-sleek p-8 text-center"
             >
               <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-green-100 flex items-center justify-center">
                 <CheckCircle2 className="w-10 h-10 text-green-600" />
@@ -275,13 +275,13 @@ function ValidInvoiceUI({ data }: { data: InvoiceData }) {
 
   return (
     <main className="min-h-screen">
-      <Navbar hideNavLinks />
+      <Navbar />
       <div className="pt-32 pb-16 px-6">
         <div className="max-w-lg mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-card rounded-3xl border border-border-subtle dark:shadow-dark-sleek overflow-hidden"
+            className="bg-white rounded-3xl border border-border-subtle shadow-sleek overflow-hidden"
           >
             {/* Header */}
             <div className="bg-brand-orange/5 border-b border-brand-orange/10 p-6">

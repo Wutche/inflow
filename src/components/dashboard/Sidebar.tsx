@@ -50,7 +50,7 @@ export function Sidebar() {
 
   return (
     <>
-      <aside className="w-64 h-screen bg-sidebar border-r border-border-subtle flex flex-col p-6 fixed left-0 top-0 transition-all duration-300">
+      <aside className="w-64 h-screen bg-sidebar border-r border-border-subtle flex flex-col p-6 fixed left-0 top-0">
         {/* Logo */}
         <div className="flex items-center gap-2 mb-10 px-2">
           <div className="relative w-8 h-8">
@@ -58,16 +58,16 @@ export function Sidebar() {
               src="/inflow Logo1 (1).png"
               alt="Inflow Logo"
               fill
-              className="object-contain dark:brightness-110"
+              className="object-contain"
             />
           </div>
-          <span className="text-xl font-bold tracking-tight text-foreground">Inflow</span>
+          <span className="text-xl font-bold tracking-tight">Inflow</span>
         </div>
 
         {/* Primary Action */}
         <Link
           href="/dashboard/invoices/new"
-          className="flex items-center justify-center gap-2 w-full py-3 bg-brand-orange text-white rounded-2xl font-bold hover:dark:shadow-[0_8px_25px_rgba(255,107,0,0.3)] transition-all mb-8 cursor-pointer active:scale-95 group overflow-hidden relative"
+          className="flex items-center justify-center gap-2 w-full py-3 bg-brand-orange text-white rounded-2xl font-bold hover:shadow-[0_8px_25px_rgba(255,107,0,0.3)] transition-all shadow-sleek mb-8 cursor-pointer active:scale-95 group overflow-hidden relative"
         >
           <div className="absolute inset-0 bg-linear-to-tr from-black/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
           <Plus size={18} className="relative z-10" />
@@ -85,8 +85,8 @@ export function Sidebar() {
                 className={cn(
                   "flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group cursor-pointer",
                   isActive
-                    ? "bg-card text-foreground border border-border-subtle transition-all duration-200"
-                    : "text-muted hover:bg-sidebar-hover hover:text-foreground"
+                    ? "bg-white text-foreground shadow-sm border border-border-subtle"
+                    : "text-muted hover:bg-white/50 hover:text-foreground"
                 )}
               >
                 <item.icon
@@ -108,7 +108,7 @@ export function Sidebar() {
         <div className="mt-auto pt-6 border-t border-border-subtle space-y-2">
           {/* Ethereum Status */}
           {ethConnected ? (
-            <div className="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-card border border-border-subtle dark:shadow-sm">
+            <div className="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-white border border-border-subtle">
               <Image
                 src="https://cryptologos.cc/logos/ethereum-eth-logo.png"
                 alt="ETH"
@@ -130,7 +130,7 @@ export function Sidebar() {
           ) : (
             <button
               onClick={handleConnectEth}
-              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl bg-sidebar/50 border border-dashed border-border-subtle hover:border-brand-orange/50 hover:bg-card transition-all cursor-pointer group"
+              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl bg-white/50 border border-dashed border-border-subtle hover:border-brand-orange/50 hover:bg-white transition-all cursor-pointer group"
             >
               <Image
                 src="https://cryptologos.cc/logos/ethereum-eth-logo.png"
@@ -157,7 +157,7 @@ export function Sidebar() {
 
           {/* Stacks Status */}
           {stacksConnected ? (
-            <div className="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-card border border-border-subtle dark:shadow-sm">
+            <div className="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-white border border-border-subtle">
               <Image
                 src="https://cryptologos.cc/logos/stacks-stx-logo.png"
                 alt="STX"
@@ -179,7 +179,7 @@ export function Sidebar() {
           ) : (
             <button
               onClick={handleConnectStacks}
-              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl bg-sidebar/50 border border-dashed border-border-subtle hover:border-brand-orange/50 hover:bg-card transition-all cursor-pointer group"
+              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl bg-white/50 border border-dashed border-border-subtle hover:border-brand-orange/50 hover:bg-white transition-all cursor-pointer group"
             >
               <Image
                 src="https://cryptologos.cc/logos/stacks-stx-logo.png"

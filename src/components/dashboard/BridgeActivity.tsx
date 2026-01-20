@@ -9,10 +9,10 @@ export function BridgeActivity() {
     useBridgeHistory();
 
   return (
-    <div className="bg-card rounded-3xl border border-border-subtle dark:shadow-dark-sleek flex-1 transition-all duration-300">
-      <div className="p-6 border-b border-border-subtle flex justify-between items-center text-foreground">
+    <div className="bg-white rounded-3xl border border-border-subtle shadow-sleek flex-1">
+      <div className="p-6 border-b border-border-subtle flex justify-between items-center">
         <div>
-          <h2 className="text-lg font-bold tracking-tight text-foreground">Bridge Activity</h2>
+          <h2 className="text-lg font-bold tracking-tight">Bridge Activity</h2>
           <p className="text-xs text-muted font-medium mt-1">
             Cross-chain transfers
           </p>
@@ -46,10 +46,10 @@ export function BridgeActivity() {
               return (
                 <div
                   key={tx.id}
-                  className="flex items-center justify-between p-4 rounded-2xl hover:bg-sidebar-hover transition-colors group cursor-pointer"
+                  className="flex items-center justify-between p-4 rounded-2xl hover:bg-sidebar transition-colors group cursor-pointer"
                 >
                   <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 rounded-xl bg-sidebar border border-border-subtle flex items-center justify-center group-hover:bg-card transition-colors dark:group-hover:bg-sidebar-hover">
+                    <div className="w-10 h-10 rounded-xl bg-sidebar border border-border-subtle flex items-center justify-center group-hover:bg-white transition-colors">
                       <ArrowLeftRight
                         size={18}
                         className="text-muted group-hover:text-brand-orange transition-colors"

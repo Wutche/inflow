@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState } from "react";
 import QRCode from "qrcode";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import {
@@ -18,9 +18,6 @@ import {
   ExternalLink,
   Share2,
   MessageSquare,
-  Mail,
-  Send,
-  Loader2,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
@@ -28,8 +25,6 @@ import { useRouter } from "next/navigation";
 import { createPaymentUrl } from "@/lib/url-state";
 import { RecentInvoices } from "@/components/RecentInvoices";
 import { useInvoiceHistory } from "@/hooks/useInvoiceHistory";
-import { sendInvoiceEmail, isValidEmail } from "@/lib/email";
-import { useNotifications } from "@/hooks/useNotifications";
 
 interface InvoiceItem {
   id: string;
@@ -49,22 +44,13 @@ export default function NewInvoicePage() {
   const [qrCodeUrl, setQrCodeUrl] = useState<string | null>(null);
   const [isCopied, setIsCopied] = useState(false);
 
-   // Form fields for invoice encoding
+  // Form fields for invoice encoding
   const [clientWallet, setClientWallet] = useState("");
   const [invoiceMemo, setInvoiceMemo] = useState("");
   const [invoiceDate, setInvoiceDate] = useState(""); // ISO date string from date picker
 
   // History hook for persisting generated invoices
   const { saveInvoice } = useInvoiceHistory();
-  
-  // Notifications hook
-  const { addNotification } = useNotifications();
-
-  // Email state
-  const [clientEmail, setClientEmail] = useState("");
-  const [isSendingEmail, setIsSendingEmail] = useState(false);
-  const [emailSent, setEmailSent] = useState(false);
-  const [emailError, setEmailError] = useState<string | null>(null);
 
   // Generate stable invoice ID on mount using lazy state initialization
   const [defaultInvoiceId] = useState(
@@ -164,13 +150,6 @@ export default function NewInvoicePage() {
         link: paymentUrl,
         network: networkParam,
       });
-
-      // Create notification for the new invoice
-      addNotification(
-        "invoice_created",
-        "Invoice Created",
-        `New invoice for $${calculateSubtotal().toFixed(2)} ${tokenSymbol} generated`
-      );
     }, 800);
   };
 
@@ -181,53 +160,6 @@ export default function NewInvoicePage() {
       setTimeout(() => setIsCopied(false), 2000);
     }
   };
-
-  /**
-   * Sends the invoice via email to the client.
-   */
-  const sendEmail = useCallback(async () => {
-    if (!generatedLink || !clientEmail) return;
-
-    // Validate email
-    if (!isValidEmail(clientEmail)) {
-      setEmailError("Please enter a valid email address");
-      return;
-    }
-
-    setIsSendingEmail(true);
-    setEmailError(null);
-    setEmailSent(false);
-
-    const tokenSymbol = network === "Stacks" ? "USDCx" : "USDC";
-    const networkParam = network.toLowerCase() as "stacks" | "ethereum";
-
-    const result = await sendInvoiceEmail({
-      to_email: clientEmail,
-      amount: calculateSubtotal().toFixed(2),
-      token: tokenSymbol,
-      recipient: clientWallet,
-      network: networkParam,
-      pay_link: generatedLink,
-      memo: invoiceMemo || undefined,
-    });
-
-    setIsSendingEmail(false);
-
-    if (result.success) {
-      setEmailSent(true);
-      addNotification(
-        "invoice_sent",
-        "Invoice Sent",
-        `Invoice emailed to ${clientEmail}`
-      );
-      // Reset after 3 seconds
-      setTimeout(() => {
-        setEmailSent(false);
-      }, 3000);
-    } else {
-      setEmailError(result.message);
-    }
-  }, [generatedLink, clientEmail, network, clientWallet, invoiceMemo, addNotification, calculateSubtotal]);
 
   return (
     <DashboardLayout
@@ -255,10 +187,10 @@ export default function NewInvoicePage() {
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="bg-card border border-border-subtle rounded-[40px] overflow-hidden dark:shadow-dark-sleek"
+              className="bg-white border border-border-subtle rounded-[40px] shadow-sm overflow-hidden"
             >
               {/* Header Info */}
-              <div className="p-10 border-b border-border-subtle bg-sidebar/50">
+              <div className="p-10 border-b border-gray-50 bg-sidebar/30">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                   <div className="space-y-4">
                     <label className="text-[10px] font-black text-muted uppercase tracking-widest pl-1">
@@ -267,7 +199,7 @@ export default function NewInvoicePage() {
                     <input
                       type="text"
                       placeholder="Client Name or Organization"
-                      className="w-full px-6 py-4 bg-sidebar border border-border-subtle rounded-2xl text-sm font-bold text-foreground focus:outline-none focus:ring-2 focus:ring-brand-orange/20 transition-all"
+                      className="w-full px-6 py-4 bg-white border border-border-subtle rounded-2xl text-sm font-bold focus:outline-none focus:ring-2 focus:ring-brand-orange/20 transition-all"
                       required
                     />
                     <input
@@ -275,7 +207,7 @@ export default function NewInvoicePage() {
                       placeholder="Client Wallet Address (Stacks or ETH)"
                       value={clientWallet}
                       onChange={(e) => setClientWallet(e.target.value)}
-                      className="w-full px-6 py-4 bg-sidebar border border-border-subtle rounded-2xl text-xs font-mono font-bold text-foreground focus:outline-none focus:ring-2 focus:ring-brand-orange/20 transition-all"
+                      className="w-full px-6 py-4 bg-white border border-border-subtle rounded-2xl text-xs font-mono font-bold focus:outline-none focus:ring-2 focus:ring-brand-orange/20 transition-all"
                       required
                     />
                   </div>
@@ -292,7 +224,7 @@ export default function NewInvoicePage() {
                         type="date"
                         value={invoiceDate}
                         onChange={(e) => setInvoiceDate(e.target.value)}
-                        className="w-full pl-14 pr-6 py-4 bg-sidebar border border-border-subtle rounded-2xl text-sm font-bold text-foreground focus:outline-none focus:ring-2 focus:ring-brand-orange/20 transition-all uppercase tracking-tight"
+                        className="w-full pl-14 pr-6 py-4 bg-white border border-border-subtle rounded-2xl text-sm font-bold focus:outline-none focus:ring-2 focus:ring-brand-orange/20 transition-all uppercase tracking-tight"
                         required
                       />
                     </div>
@@ -305,7 +237,7 @@ export default function NewInvoicePage() {
                         type="text"
                         placeholder="Invoice ID (e.g. INV-001)"
                         defaultValue={defaultInvoiceId}
-                        className="w-full pl-14 pr-6 py-4 bg-sidebar border border-border-subtle rounded-2xl text-sm font-bold text-foreground focus:outline-none focus:ring-2 focus:ring-brand-orange/20 transition-all"
+                        className="w-full pl-14 pr-6 py-4 bg-white border border-border-subtle rounded-2xl text-sm font-bold focus:outline-none focus:ring-2 focus:ring-brand-orange/20 transition-all"
                         required
                       />
                     </div>
@@ -324,7 +256,7 @@ export default function NewInvoicePage() {
                       value={invoiceMemo}
                       onChange={(e) => setInvoiceMemo(e.target.value)}
                       maxLength={50}
-                      className="w-full pl-14 pr-6 py-4 bg-sidebar border border-border-subtle rounded-2xl text-sm font-bold text-foreground focus:outline-none focus:ring-2 focus:ring-brand-orange/20 transition-all"
+                      className="w-full pl-14 pr-6 py-4 bg-white border border-border-subtle rounded-2xl text-sm font-bold focus:outline-none focus:ring-2 focus:ring-brand-orange/20 transition-all"
                     />
                   </div>
                 </div>
@@ -364,7 +296,7 @@ export default function NewInvoicePage() {
                             onChange={(e) =>
                               updateItem(item.id, "description", e.target.value)
                             }
-                            className="w-full px-6 py-4 bg-sidebar/50 border border-border-subtle rounded-2xl text-sm font-bold text-foreground focus:outline-none focus:ring-2 focus:ring-brand-orange/20 transition-all group-hover:bg-card dark:group-hover:bg-sidebar"
+                            className="w-full px-6 py-4 bg-sidebar/50 border border-border-subtle rounded-2xl text-sm font-bold focus:outline-none focus:ring-2 focus:ring-brand-orange/20 transition-all group-hover:bg-white"
                             required
                           />
                         </div>
@@ -380,7 +312,7 @@ export default function NewInvoicePage() {
                                 parseInt(e.target.value) || 0,
                               )
                             }
-                            className="w-full px-4 py-4 bg-sidebar/50 border border-border-subtle rounded-2xl text-sm font-bold text-foreground focus:outline-none focus:ring-2 focus:ring-brand-orange/20 transition-all text-center group-hover:bg-card dark:group-hover:bg-sidebar"
+                            className="w-full px-4 py-4 bg-sidebar/50 border border-border-subtle rounded-2xl text-sm font-bold focus:outline-none focus:ring-2 focus:ring-brand-orange/20 transition-all text-center group-hover:bg-white"
                             required
                           />
                         </div>
@@ -399,7 +331,7 @@ export default function NewInvoicePage() {
                                 parseFloat(e.target.value) || 0,
                               )
                             }
-                            className="w-full pl-8 pr-4 py-4 bg-sidebar/50 border border-border-subtle rounded-2xl text-sm font-bold text-foreground focus:outline-none focus:ring-2 focus:ring-brand-orange/20 transition-all group-hover:bg-card dark:group-hover:bg-sidebar"
+                            className="w-full pl-8 pr-4 py-4 bg-sidebar/50 border border-border-subtle rounded-2xl text-sm font-bold focus:outline-none focus:ring-2 focus:ring-brand-orange/20 transition-all group-hover:bg-white"
                             required
                           />
                         </div>
@@ -417,7 +349,7 @@ export default function NewInvoicePage() {
               </div>
 
               {/* Summary */}
-              <div className="px-10 py-10 border-t border-border-subtle bg-sidebar/10">
+              <div className="px-10 py-10 border-t border-gray-50 bg-sidebar/10">
                 <div className="flex flex-col items-end space-y-4">
                   <div className="flex items-center gap-20">
                     <span className="text-xs font-bold text-muted uppercase tracking-widest">
@@ -449,9 +381,9 @@ export default function NewInvoicePage() {
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.1 }}
-              className="bg-card border border-border-subtle rounded-[32px] p-8 dark:shadow-dark-sleek"
+              className="bg-white border border-border-subtle rounded-[32px] p-8 shadow-sm"
             >
-              <h3 className="text-sm font-black text-foreground uppercase tracking-widest mb-6 border-b border-border-subtle pb-4">
+              <h3 className="text-sm font-black text-foreground uppercase tracking-widest mb-6 border-b border-gray-50 pb-4">
                 Payment Network
               </h3>
 
@@ -462,7 +394,7 @@ export default function NewInvoicePage() {
                   className={`w-full flex items-center justify-between p-4 rounded-2xl border transition-all cursor-pointer ${
                     network === "Stacks"
                       ? "bg-brand-orange/5 border-brand-orange shadow-sm text-brand-orange"
-                      : "bg-sidebar border-border-subtle text-muted hover:border-sidebar-hover dark:hover:border-zinc-700"
+                      : "bg-white border-border-subtle text-muted hover:border-gray-300"
                   }`}
                 >
                   <div className="flex items-center gap-3">
@@ -495,7 +427,7 @@ export default function NewInvoicePage() {
                   className={`w-full flex items-center justify-between p-4 rounded-2xl border transition-all cursor-pointer ${
                     network === "Ethereum"
                       ? "bg-brand-blue/5 border-brand-blue shadow-sm text-brand-blue"
-                      : "bg-sidebar border-border-subtle text-muted hover:border-sidebar-hover dark:hover:border-zinc-700"
+                      : "bg-white border-border-subtle text-muted hover:border-gray-300"
                   }`}
                 >
                   <div className="flex items-center gap-3">
@@ -555,7 +487,7 @@ export default function NewInvoicePage() {
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full py-5 bg-black text-white rounded-[24px] font-black text-sm uppercase tracking-widest hover:bg-black/90 transition-all flex items-center justify-center gap-3 cursor-pointer group disabled:opacity-50 disabled:cursor-not-allowed dark:bg-white dark:text-black dark:hover:bg-white/90 dark:shadow-2xl dark:shadow-black/20"
+                className="w-full py-5 bg-black text-white rounded-[24px] font-black text-sm uppercase tracking-widest hover:bg-black/90 transition-all shadow-2xl shadow-black/20 flex items-center justify-center gap-3 cursor-pointer group disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isSubmitting ? (
                   <span className="animate-pulse">Generating...</span>
@@ -572,7 +504,7 @@ export default function NewInvoicePage() {
 
               <button
                 type="button"
-                className="w-full py-5 bg-card border border-border-subtle text-muted rounded-[24px] font-black text-sm uppercase tracking-widest hover:bg-sidebar-hover transition-all cursor-pointer"
+                className="w-full py-5 bg-white border border-border-subtle text-muted rounded-[24px] font-black text-sm uppercase tracking-widest hover:bg-gray-50 transition-all cursor-pointe"
               >
                 Save as Draft
               </button>
@@ -597,7 +529,7 @@ export default function NewInvoicePage() {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="fixed inset-0 bg-overlay/40 backdrop-blur-sm z-200 cursor-pointer"
+                className="fixed inset-0 bg-black/40 backdrop-blur-sm z-200 cursor-pointer"
                 onClick={() => setGeneratedLink(null)}
               />
               <div className="fixed inset-0 flex items-center justify-center z-201 pointer-events-none p-4">
@@ -605,7 +537,7 @@ export default function NewInvoicePage() {
                   initial={{ opacity: 0, scale: 0.9, y: 20 }}
                   animate={{ opacity: 1, scale: 1, y: 0 }}
                   exit={{ opacity: 0, scale: 0.9, y: 20 }}
-                  className="w-full max-w-lg bg-card border border-border-subtle rounded-[24px] sm:rounded-[40px] pointer-events-auto overflow-y-auto scrollbar-hide max-h-[90vh] text-center p-6 sm:p-10 md:p-12 relative dark:shadow-2xl"
+                  className="w-full max-w-lg bg-white border border-border-subtle rounded-[24px] sm:rounded-[40px] shadow-2xl pointer-events-auto overflow-y-auto scrollbar-hide max-h-[90vh] text-center p-6 sm:p-10 md:p-12 relative"
                 >
                   {/* Decorative Glows */}
                   <div className="absolute top-0 left-0 w-32 h-32 bg-brand-orange/10 rounded-full blur-3xl -z-10" />
@@ -648,13 +580,13 @@ export default function NewInvoicePage() {
                     </div>
 
                     <div className="grid grid-cols-2 gap-4">
-                      <button className="flex items-center justify-center gap-3 py-4 bg-card border border-border-subtle rounded-2xl text-[11px] font-black text-muted uppercase tracking-widest hover:text-foreground hover:bg-sidebar-hover transition-all cursor-pointer">
+                      <button className="flex items-center justify-center gap-3 py-4 bg-white border border-border-subtle rounded-2xl text-[11px] font-black text-muted uppercase tracking-widest hover:text-foreground hover:bg-gray-50 transition-all cursor-pointer">
                         <Share2 size={16} />
                         Share Link
                       </button>
                       <button
                         onClick={() => setGeneratedLink(null)}
-                        className="flex items-center justify-center gap-3 py-4 bg-card border border-border-subtle rounded-2xl text-[11px] font-black text-muted uppercase tracking-widest hover:text-foreground hover:bg-sidebar-hover transition-all cursor-pointer"
+                        className="flex items-center justify-center gap-3 py-4 bg-white border border-border-subtle rounded-2xl text-[11px] font-black text-muted uppercase tracking-widest hover:text-foreground hover:bg-gray-50 transition-all cursor-pointer"
                       >
                         <ExternalLink size={16} />
                         Preview
@@ -668,79 +600,16 @@ export default function NewInvoicePage() {
                         <img
                           src={qrCodeUrl}
                           alt="Invoice QR Code"
-                          className="w-28 h-28 sm:w-40 sm:h-40 rounded-lg sm:rounded-xl border border-border-subtle bg-white p-2"
+                          className="w-28 h-28 sm:w-40 sm:h-40 rounded-lg sm:rounded-xl border border-border-subtle"
                         />
                         <p className="text-[10px] sm:text-xs text-muted mt-2 font-medium">
                           Scan to pay
                         </p>
                       </div>
                     )}
-
-                    {/* Email Invoice Section */}
-                    <div className="mt-6 pt-6 border-t border-border-subtle">
-                      <div className="flex items-center justify-center gap-2 mb-4">
-                        <Mail size={14} className="text-muted" />
-                        <span className="text-[10px] font-black text-muted uppercase tracking-widest">
-                          Send via Email
-                        </span>
-                      </div>
-                      
-                      <div className="flex gap-2">
-                        <input
-                          type="email"
-                          value={clientEmail}
-                          onChange={(e) => {
-                            setClientEmail(e.target.value);
-                            setEmailError(null);
-                          }}
-                          placeholder="client@email.com"
-                          disabled={isSendingEmail || emailSent}
-                          className={`flex-1 px-4 py-3 rounded-xl border text-sm text-center ${
-                            emailError 
-                              ? "border-red-500" 
-                              : emailSent 
-                                ? "border-green-500 bg-green-50"
-                                : "border-border-subtle"
-                          } bg-sidebar focus:outline-none focus:ring-2 focus:ring-brand-orange/20 transition-all disabled:opacity-50`}
-                        />
-                        <motion.button
-                          type="button"
-                          whileHover={{ scale: isSendingEmail || emailSent ? 1 : 1.02 }}
-                          whileTap={{ scale: isSendingEmail || emailSent ? 1 : 0.98 }}
-                          onClick={sendEmail}
-                          disabled={!clientEmail || isSendingEmail || emailSent}
-                          className={`px-5 py-3 rounded-xl font-bold flex items-center gap-2 transition-colors cursor-pointer ${
-                            emailSent
-                              ? "bg-green-500 text-white"
-                              : "bg-brand-orange text-white hover:bg-brand-orange/90"
-                          } disabled:opacity-50 disabled:cursor-not-allowed`}
-                        >
-                          {isSendingEmail ? (
-                            <Loader2 size={16} className="animate-spin" />
-                          ) : emailSent ? (
-                            <Check size={16} />
-                          ) : (
-                            <Send size={16} />
-                          )}
-                          <span className="text-xs font-black uppercase tracking-widest">
-                            {isSendingEmail ? "Sending" : emailSent ? "Sent!" : "Send"}
-                          </span>
-                        </motion.button>
-                      </div>
-                      
-                      {emailError && (
-                        <p className="mt-2 text-xs text-red-500 text-center">{emailError}</p>
-                      )}
-                      
-                      {emailSent && (
-                        <p className="mt-2 text-xs text-green-600 text-center">
-                          ✓ Invoice sent to {clientEmail}
-                        </p>
-                      )}
-                    </div>
                   </div>
 
-                  <div className="mt-8 pt-6 border-t border-border-subtle">
+                  <div className="mt-10 pt-8 border-t border-gray-50">
                     <button
                       onClick={() => router.push("/dashboard/invoices")}
                       className="text-[10px] font-black text-muted hover:text-brand-orange uppercase tracking-[0.2em] transition-all cursor-pointer"

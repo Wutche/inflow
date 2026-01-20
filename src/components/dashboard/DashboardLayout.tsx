@@ -21,7 +21,7 @@ export function DashboardLayout({ children, title, subtitle }: DashboardLayoutPr
 
   return (
     <AuthGuard>
-      <div className="min-h-screen bg-background transition-colors duration-300">
+      <div className="min-h-screen bg-[#F8F9FB]">
         <Sidebar />
         <main className="flex-1 ml-64 px-[20px] py-8 min-h-screen">
           <div className="max-w-7xl mx-auto">

@@ -1,65 +1,33 @@
 @import "tailwindcss";
 
-@theme {
-  --color-background: #ffffff;
-  --color-foreground: #000000;
-  --color-brand-orange: #ff8a00;
-  --color-brand-blue: #00d1ff;
-  --color-card: #ffffff;
-  --color-sidebar: #f8f9fa;
-  --color-border-subtle: #e2e8f0;
-  --color-muted: #64748b;
-  --color-sidebar-hover: rgba(0, 0, 0, 0.05);
+:root {
+  --background: #ffffff;
+  --foreground: #000000;
+  --brand-orange: #ff8a00;
+  --brand-blue: #00d1ff;
+  --card-background: #ffffff;
+  --sidebar-background: #f8f9fa;
+  --border-color: #e2e8f0;
+  --muted-text: #64748b;
+}
+
+@theme inline {
+  --color-brand-orange: var(--brand-orange);
+  --color-brand-blue: var(--brand-blue);
+  --color-card: var(--card-background);
+  --color-sidebar: var(--sidebar-background);
+  --color-border-subtle: var(--border-color);
+  --color-muted: var(--muted-text);
 
   --radius-2xl: 1rem;
   --radius-3xl: 1.5rem;
 
-  /* v4 Theme overrides - These might be ignored if the build tool has issues, so we provide fallback below */
-  --shadow-sm: none;
-  --shadow-md: none;
-  --shadow-lg: none;
-  --shadow-xl: none;
-  --shadow-2xl: none;
-  --shadow-sleek: none;
-  --shadow-dark-sleek: 0 4px 20px -2px rgba(0, 0, 0, 0.5);
-
-  --mesh-opacity-orange-primary: 0.5;
-  --mesh-opacity-orange-secondary: 0.25;
-  --mesh-opacity-cyan-primary: 0.4;
-  --mesh-opacity-cyan-secondary: 0.2;
-}
-
-/* Fail-safe Shadow Kill for Light Mode - Aggressive Wildcard */
-html:not([data-theme="dark"]) *:not(.allow-shadow),
-html[data-theme="light"] *:not(.allow-shadow) {
-  --tw-shadow: 0 0 #0000 !important;
-  --tw-shadow-colored: 0 0 #0000 !important;
-  box-shadow: none !important;
-}
-
-[data-theme="dark"] {
-  --color-background: #0a0a0a;
-  --color-foreground: #ffffff;
-  --color-card: #111111;
-  --color-sidebar: #0a0a0a;
-  --color-border-subtle: #222222;
-  --color-muted: #a1a1aa;
-  --color-sidebar-hover: rgba(255, 255, 255, 0.03);
-  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-  --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-  --mesh-opacity-orange-primary: 0.2;
-  --mesh-opacity-orange-secondary: 0.1;
-  --mesh-opacity-cyan-primary: 0.15;
-  --mesh-opacity-cyan-secondary: 0.05;
-  color-scheme: dark;
+  --shadow-sleek: 0 4px 20px -2px rgba(0, 0, 0, 0.05);
 }
 
 body {
-  background: var(--color-background);
-  color: var(--color-foreground);
+  background: var(--background);
+  color: var(--foreground);
   font-family:
     var(--font-sora),
     var(--font-inter),
@@ -70,13 +38,13 @@ body {
 }
 
 .glass-card {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.8);
   backdrop-filter: blur(8px);
-  border: 1px solid var(--color-border-subtle);
+  border: 1px solid var(--border-color);
 }
 
 .gradient-text {
-  background: linear-gradient(135deg, var(--color-brand-blue), var(--color-brand-orange));
+  background: linear-gradient(135deg, var(--brand-blue), var(--brand-orange));
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
