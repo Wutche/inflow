@@ -11,15 +11,11 @@ import {
   FileText,
   ArrowLeftRight,
   DollarSign,
-  Loader2,
 } from "lucide-react";
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useInvoiceHistory, HistoryItem } from "@/hooks/useInvoiceHistory";
-import {
-  useBridgeHistory,
-  BridgeTransaction,
-} from "@/hooks/useBridgeHistory";
+import { useBridgeHistory, BridgeTransaction } from "@/hooks/useBridgeHistory";
 
 interface SearchModalProps {
   isOpen: boolean;
@@ -98,19 +94,19 @@ function getStatusDisplay(status: string): string {
 }
 
 export function SearchModal({ isOpen, onClose }: SearchModalProps) {
+  return (
+    <AnimatePresence>
+      {isOpen && <SearchContent onClose={onClose} />}
+    </AnimatePresence>
+  );
+}
+
+function SearchContent({ onClose }: { onClose: () => void }) {
   const router = useRouter();
   const [query, setQuery] = useState("");
   const [selectedIndex, setSelectedIndex] = useState(0);
   const { history: invoices } = useInvoiceHistory();
   const { transactions: bridges } = useBridgeHistory();
-
-  // Reset state when modal opens/closes
-  useEffect(() => {
-    if (isOpen) {
-      setQuery("");
-      setSelectedIndex(0);
-    }
-  }, [isOpen]);
 
   // Combine and transform data into unified search results
   const allItems = useMemo((): SearchResult[] => {
@@ -186,67 +182,12 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
 
     const lowerQuery = query.toLowerCase().trim();
     return quickActions.filter((action) =>
-      action.label.toLowerCase().includes(lowerQuery)
+      action.label.toLowerCase().includes(lowerQuery),
     );
   }, [query]);
 
   // Total navigable items
   const totalItems = searchResults.length + filteredQuickActions.length;
-
-  // Reset selected index when results change
-  useEffect(() => {
-    setSelectedIndex(0);
-  }, [query]);
-
-  // Handle keyboard navigation
-  useEffect(() => {
-    if (!isOpen) return;
-
-    const handleKeyDown = (e: KeyboardEvent) => {
-      switch (e.key) {
-        case "ArrowDown":
-          e.preventDefault();
-          setSelectedIndex((prev) => (prev + 1) % totalItems);
-          break;
-        case "ArrowUp":
-          e.preventDefault();
-          setSelectedIndex((prev) => (prev - 1 + totalItems) % totalItems);
-          break;
-        case "Enter":
-          e.preventDefault();
-          handleSelect(selectedIndex);
-          break;
-        case "Escape":
-          e.preventDefault();
-          onClose();
-          break;
-      }
-    };
-
-    document.addEventListener("keydown", handleKeyDown);
-    return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [isOpen, selectedIndex, totalItems]);
-
-  // Handle keyboard shortcuts for quick actions
-  useEffect(() => {
-    if (!isOpen) return;
-
-    const handleShortcut = (e: KeyboardEvent) => {
-      if (e.metaKey || e.ctrlKey) {
-        const action = quickActions.find(
-          (a) => a.shortcut.toLowerCase() === e.key.toLowerCase()
-        );
-        if (action) {
-          e.preventDefault();
-          router.push(action.href);
-          onClose();
-        }
-      }
-    };
-
-    document.addEventListener("keydown", handleShortcut);
-    return () => document.removeEventListener("keydown", handleShortcut);
-  }, [isOpen, router, onClose]);
 
   // Handle selection of an item
   const handleSelect = useCallback(
@@ -271,7 +212,7 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
       }
       onClose();
     },
-    [searchResults, filteredQuickActions, router, onClose]
+    [searchResults, filteredQuickActions, router, onClose],
   );
 
   // Handle click on result item
@@ -285,186 +226,229 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
     onClose();
   };
 
+  // Handle keyboard navigation
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      switch (e.key) {
+        case "ArrowDown":
+          e.preventDefault();
+          setSelectedIndex((prev) => (prev + 1) % totalItems);
+          break;
+        case "ArrowUp":
+          e.preventDefault();
+          setSelectedIndex((prev) => (prev - 1 + totalItems) % totalItems);
+          break;
+        case "Enter":
+          e.preventDefault();
+          handleSelect(selectedIndex);
+          break;
+        case "Escape":
+          e.preventDefault();
+          onClose();
+          break;
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [selectedIndex, totalItems, handleSelect, onClose]);
+
+  // Handle keyboard shortcuts for quick actions
+  useEffect(() => {
+    const handleShortcut = (e: KeyboardEvent) => {
+      if (e.metaKey || e.ctrlKey) {
+        const action = quickActions.find(
+          (a) => a.shortcut.toLowerCase() === e.key.toLowerCase(),
+        );
+        if (action) {
+          e.preventDefault();
+          router.push(action.href);
+          onClose();
+        }
+      }
+    };
+
+    document.addEventListener("keydown", handleShortcut);
+    return () => document.removeEventListener("keydown", handleShortcut);
+  }, [router, onClose]);
+
   return (
-    <AnimatePresence>
-      {isOpen && (
-        <>
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={onClose}
-            className="fixed inset-0 bg-black/60 backdrop-blur-md z-200 cursor-pointer"
-          />
-          <div className="fixed inset-0 flex items-start justify-center z-201 pointer-events-none pt-[15vh] px-4">
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: -20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: -20 }}
-              className="w-full max-w-2xl bg-card border border-border-subtle rounded-[32px] overflow-hidden pointer-events-auto dark:shadow-dark-sleek"
+    <>
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        onClick={onClose}
+        className="fixed inset-0 bg-black/60 backdrop-blur-md z-200 cursor-pointer"
+      />
+      <div className="fixed inset-0 flex items-start justify-center z-201 pointer-events-none pt-[15vh] px-4">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95, y: -20 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          exit={{ opacity: 0, scale: 0.95, y: -20 }}
+          className="w-full max-w-2xl bg-card border border-border-subtle rounded-[32px] overflow-hidden pointer-events-auto dark:shadow-dark-sleek"
+        >
+          <div className="relative">
+            <Search
+              className="absolute left-6 top-1/2 -translate-y-1/2 text-muted"
+              size={20}
+            />
+            <input
+              autoFocus
+              type="text"
+              placeholder="Search invoices, transactions, or type a command..."
+              value={query}
+              onChange={(e) => {
+                setQuery(e.target.value);
+                setSelectedIndex(0);
+              }}
+              className="w-full pl-16 pr-12 py-6 text-lg font-bold bg-card text-foreground focus:outline-none placeholder:text-muted/50 transition-colors"
+            />
+            <button
+              onClick={onClose}
+              className="absolute right-6 top-1/2 -translate-y-1/2 p-1.5 rounded-lg bg-sidebar-hover text-muted hover:text-foreground cursor-pointer transition-colors"
             >
-              <div className="relative">
-                <Search
-                  className="absolute left-6 top-1/2 -translate-y-1/2 text-muted"
-                  size={20}
-                />
-                <input
-                  autoFocus
-                  type="text"
-                  placeholder="Search invoices, transactions, or type a command..."
-                  value={query}
-                  onChange={(e) => setQuery(e.target.value)}
-                  className="w-full pl-16 pr-12 py-6 text-lg font-bold bg-card text-foreground focus:outline-none placeholder:text-muted/50 transition-colors"
-                />
-                <button
-                  onClick={onClose}
-                  className="absolute right-6 top-1/2 -translate-y-1/2 p-1.5 rounded-lg bg-sidebar-hover text-muted hover:text-foreground cursor-pointer transition-colors"
-                >
-                  <X size={16} />
-                </button>
-              </div>
-
-              <div className="p-4 bg-sidebar/50 border-t border-border-subtle max-h-[60vh] overflow-y-auto">
-                {/* Search Results / Recent Activity */}
-                {(searchResults.length > 0 || allItems.length === 0) && (
-                  <div className="mb-6">
-                    <h3 className="text-[10px] font-black text-muted uppercase tracking-widest px-4 mb-3 flex items-center gap-2">
-                      <Clock size={12} />
-                      {query.trim()
-                        ? `Search Results (${searchResults.length})`
-                        : "Recent Activity"}
-                    </h3>
-                    {searchResults.length > 0 ? (
-                      <div className="space-y-1">
-                        {searchResults.map((item, idx) => (
-                          <button
-                            key={item.id}
-                            onClick={() => handleResultClick(idx)}
-                            className={`w-full flex items-center justify-between px-4 py-3 rounded-2xl transition-all group cursor-pointer border ${
-                              selectedIndex === idx
-                                ? "bg-card border-brand-orange/30"
-                                : "border-transparent hover:bg-card hover:border-border-subtle dark:hover:bg-sidebar-hover"
-                            }`}
-                          >
-                            <div className="flex items-center gap-4">
-                              <div
-                                className={`w-8 h-8 rounded-lg bg-sidebar border border-border-subtle flex items-center justify-center transition-colors ${
-                                  selectedIndex === idx
-                                    ? "text-brand-orange"
-                                    : "text-muted group-hover:text-brand-orange"
-                                }`}
-                              >
-                                {item.type === "invoice" ? (
-                                  <FileText size={16} />
-                                ) : (
-                                  <ArrowLeftRight size={16} />
-                                )}
-                              </div>
-                              <div className="text-left">
-                                <div className="text-sm font-bold">
-                                  {item.label}
-                                </div>
-                                <div className="text-[10px] text-muted font-medium uppercase tracking-tight">
-                                  {item.detail}
-                                </div>
-                              </div>
-                            </div>
-                            <ArrowRight
-                              size={14}
-                              className={`text-muted transition-all ${
-                                selectedIndex === idx
-                                  ? "opacity-100 translate-x-0"
-                                  : "opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0"
-                              }`}
-                            />
-                          </button>
-                        ))}
-                      </div>
-                    ) : (
-                      <div className="px-4 py-8 text-center">
-                        <div className="w-12 h-12 rounded-full bg-sidebar border border-border-subtle flex items-center justify-center mx-auto mb-3">
-                          <Search size={20} className="text-muted" />
-                        </div>
-                        <p className="text-sm text-muted font-medium">
-                          {query.trim()
-                            ? "No results found"
-                            : "No recent activity"}
-                        </p>
-                        <p className="text-xs text-muted/70 mt-1">
-                          {query.trim()
-                            ? "Try a different search term"
-                            : "Create an invoice or bridge assets to get started"}
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                )}
-
-                {/* Quick Actions */}
-                {filteredQuickActions.length > 0 && (
-                  <div>
-                    <h3 className="text-[10px] font-black text-muted uppercase tracking-widest px-4 mb-3 flex items-center gap-2">
-                      <Zap size={12} />
-                      Quick Actions
-                    </h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                      {filteredQuickActions.map((action, idx) => {
-                        const absoluteIndex = searchResults.length + idx;
-                        return (
-                          <button
-                            key={action.label}
-                            onClick={() => handleQuickActionClick(action.href)}
-                            className={`flex items-center justify-between px-4 py-3.5 rounded-2xl bg-card border transition-all group cursor-pointer dark:hover:bg-sidebar-hover ${
-                              selectedIndex === absoluteIndex
-                                ? "border-brand-orange/30"
-                                : "border-border-subtle hover:border-brand-orange/30"
-                            }`}
-                          >
-                            <div className="flex items-center gap-3">
-                              <div className="w-8 h-8 rounded-lg bg-brand-orange/5 flex items-center justify-center text-brand-orange">
-                                <action.icon size={16} />
-                              </div>
-                              <span className="text-sm font-bold text-foreground/80 group-hover:text-foreground">
-                                {action.label}
-                              </span>
-                            </div>
-                            <div className="flex items-center gap-1 px-2 py-1 bg-sidebar rounded-lg text-[10px] font-black text-muted group-hover:bg-brand-orange/10 group-hover:text-brand-orange transition-colors border border-border-subtle">
-                              <Command size={10} />
-                              <span>{action.shortcut}</span>
-                            </div>
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* Footer */}
-              <div className="px-6 py-4 border-t border-border-subtle bg-sidebar flex items-center justify-between text-[10px] font-bold text-muted uppercase tracking-widest">
-                <div className="flex gap-4">
-                  <span className="flex items-center gap-1.5">
-                    <kbd className="px-1.5 py-0.5 bg-sidebar-hover border border-border-subtle rounded-md">
-                      ↵
-                    </kbd>{" "}
-                    to select
-                  </span>
-                  <span className="flex items-center gap-1.5">
-                    <kbd className="px-1.5 py-0.5 bg-sidebar-hover border border-border-subtle rounded-md">
-                      ↑↓
-                    </kbd>{" "}
-                    to navigate
-                  </span>
-                </div>
-                <div className="flex items-center gap-1.5 text-brand-orange">
-                  <Zap size={12} />
-                  <span>Powered by Inflow AI</span>
-                </div>
-              </div>
-            </motion.div>
+              <X size={16} />
+            </button>
           </div>
-        </>
-      )}
-    </AnimatePresence>
+
+          <div className="p-4 bg-sidebar/50 border-t border-border-subtle max-h-[60vh] overflow-y-auto">
+            {/* Search Results / Recent Activity */}
+            {(searchResults.length > 0 || allItems.length === 0) && (
+              <div className="mb-6">
+                <h3 className="text-[10px] font-black text-muted uppercase tracking-widest px-4 mb-3 flex items-center gap-2">
+                  <Clock size={12} />
+                  {query.trim()
+                    ? `Search Results (${searchResults.length})`
+                    : "Recent Activity"}
+                </h3>
+                {searchResults.length > 0 ? (
+                  <div className="space-y-1">
+                    {searchResults.map((item, idx) => (
+                      <button
+                        key={item.id}
+                        onClick={() => handleResultClick(idx)}
+                        className={`w-full flex items-center justify-between px-4 py-3 rounded-2xl transition-all group cursor-pointer border ${
+                          selectedIndex === idx
+                            ? "bg-card border-brand-orange/30"
+                            : "border-transparent hover:bg-card hover:border-border-subtle dark:hover:bg-sidebar-hover"
+                        }`}
+                      >
+                        <div className="flex items-center gap-4">
+                          <div
+                            className={`w-8 h-8 rounded-lg bg-sidebar border border-border-subtle flex items-center justify-center transition-colors ${
+                              selectedIndex === idx
+                                ? "text-brand-orange"
+                                : "text-muted group-hover:text-brand-orange"
+                            }`}
+                          >
+                            {item.type === "invoice" ? (
+                              <FileText size={16} />
+                            ) : (
+                              <ArrowLeftRight size={16} />
+                            )}
+                          </div>
+                          <div className="text-left">
+                            <div className="text-sm font-bold">
+                              {item.label}
+                            </div>
+                            <div className="text-[10px] text-muted font-medium uppercase tracking-tight">
+                              {item.detail}
+                            </div>
+                          </div>
+                        </div>
+                        <ArrowRight
+                          size={14}
+                          className={`text-muted transition-all ${
+                            selectedIndex === idx
+                              ? "opacity-100 translate-x-0"
+                              : "opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0"
+                          }`}
+                        />
+                      </button>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="px-4 py-8 text-center">
+                    <div className="w-12 h-12 rounded-full bg-sidebar border border-border-subtle flex items-center justify-center mx-auto mb-3">
+                      <Search size={20} className="text-muted" />
+                    </div>
+                    <p className="text-sm text-muted font-medium">
+                      {query.trim() ? "No results found" : "No recent activity"}
+                    </p>
+                    <p className="text-xs text-muted/70 mt-1">
+                      {query.trim()
+                        ? "Try a different search term"
+                        : "Create an invoice or bridge assets to get started"}
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Quick Actions */}
+            {filteredQuickActions.length > 0 && (
+              <div>
+                <h3 className="text-[10px] font-black text-muted uppercase tracking-widest px-4 mb-3 flex items-center gap-2">
+                  <Zap size={12} />
+                  Quick Actions
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                  {filteredQuickActions.map((action, idx) => {
+                    const absoluteIndex = searchResults.length + idx;
+                    return (
+                      <button
+                        key={action.label}
+                        onClick={() => handleQuickActionClick(action.href)}
+                        className={`flex items-center justify-between px-4 py-3.5 rounded-2xl bg-card border transition-all group cursor-pointer dark:hover:bg-sidebar-hover ${
+                          selectedIndex === absoluteIndex
+                            ? "border-brand-orange/30"
+                            : "border-border-subtle hover:border-brand-orange/30"
+                        }`}
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 rounded-lg bg-brand-orange/5 flex items-center justify-center text-brand-orange">
+                            <action.icon size={16} />
+                          </div>
+                          <span className="text-sm font-bold text-foreground/80 group-hover:text-foreground">
+                            {action.label}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-1 px-2 py-1 bg-sidebar rounded-lg text-[10px] font-black text-muted group-hover:bg-brand-orange/10 group-hover:text-brand-orange transition-colors border border-border-subtle">
+                          <Command size={10} />
+                          <span>{action.shortcut}</span>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Footer */}
+          <div className="px-6 py-4 border-t border-border-subtle bg-sidebar flex items-center justify-between text-[10px] font-bold text-muted uppercase tracking-widest">
+            <div className="flex gap-4">
+              <span className="flex items-center gap-1.5">
+                <kbd className="px-1.5 py-0.5 bg-sidebar-hover border border-border-subtle rounded-md">
+                  ↵
+                </kbd>{" "}
+                to select
+              </span>
+              <span className="flex items-center gap-1.5">
+                <kbd className="px-1.5 py-0.5 bg-sidebar-hover border border-border-subtle rounded-md">
+                  ↑↓
+                </kbd>{" "}
+                to navigate
+              </span>
+            </div>
+            <div className="flex items-center gap-1.5 text-brand-orange">
+              <Zap size={12} />
+              <span>Powered by Inflow AI</span>
+            </div>
+          </div>
+        </motion.div>
+      </div>
+    </>
   );
 }

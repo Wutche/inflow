@@ -9,7 +9,7 @@ import {
   useCallback,
   useRef,
 } from "react";
-import { useRouter, usePathname } from "next/navigation";
+// No router hooks needed - using window.location for navigation
 import {
   connect as stacksConnect,
   disconnect as stacksDisconnect,
@@ -59,9 +59,13 @@ export function WalletProvider({ children }: { children: ReactNode }) {
   const [stacksConnected, setStacksConnected] = useState(false);
   const [stacksAddress, setStacksAddress] = useState<string | null>(null);
   const [isConnecting, setIsConnecting] = useState(false);
-  const router = useRouter();
-  const pathname = usePathname();
+  const [isMounted, setIsMounted] = useState(false);
   const initialized = useRef(false);
+
+  // Track client-side mount for safe navigation
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   // Check for existing sessions on mount
   useEffect(() => {
@@ -130,8 +134,11 @@ export function WalletProvider({ children }: { children: ReactNode }) {
         localStorage.setItem(STX_STORAGE_KEY, JSON.stringify({ address }));
 
         // Only redirect to dashboard if not on a /pay page
-        if (!ethConnected && !pathname.startsWith("/pay")) {
-          router.push("/dashboard");
+        const isPayPage =
+          typeof window !== "undefined" &&
+          window.location.pathname.startsWith("/pay");
+        if (!ethConnected && !isPayPage && isMounted) {
+          window.location.href = "/dashboard";
         }
       }
     } catch (error) {
@@ -148,7 +155,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     } finally {
       setIsConnecting(false);
     }
-  }, [router, ethConnected, pathname]);
+  }, [ethConnected, isMounted]);
 
   const connectEthereum = useCallback(async () => {
     setIsConnecting(true);
@@ -193,8 +200,11 @@ export function WalletProvider({ children }: { children: ReactNode }) {
           );
 
           // Only redirect to dashboard if not on a /pay page
-          if (!stacksConnected && !pathname.startsWith("/pay")) {
-            router.push("/dashboard");
+          const isPayPage =
+            typeof window !== "undefined" &&
+            window.location.pathname.startsWith("/pay");
+          if (!stacksConnected && !isPayPage && isMounted) {
+            window.location.href = "/dashboard";
           }
         }
       } else {
@@ -213,7 +223,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     } finally {
       setIsConnecting(false);
     }
-  }, [router, stacksConnected, pathname]);
+  }, [stacksConnected, isMounted]);
 
   const disconnectEthereum = useCallback(() => {
     setEthAddress(null);
