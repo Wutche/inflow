@@ -86,6 +86,17 @@ export async function verifyAndSettlePayment(
     return { isValid: false, error: "Missing X-PAYMENT header" };
   }
 
+  // Bypass verification for local testing if configured
+  if (process.env.X402_BYPASS_VERIFICATION === "true") {
+    console.log(
+      "⚠️ x402 Verification BYPASSED (X402_BYPASS_VERIFICATION=true)",
+    );
+    return {
+      isValid: true,
+      txId: "0xbypassed_transaction_" + Date.now().toString(16),
+    };
+  }
+
   try {
     const verifier = new X402PaymentVerifier(
       X402_FACILITATOR_URL,
