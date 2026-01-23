@@ -30,6 +30,7 @@ import { RecentInvoices } from "@/components/RecentInvoices";
 import { useInvoiceHistory } from "@/hooks/useInvoiceHistory";
 import { sendInvoiceEmail, isValidEmail } from "@/lib/email";
 import { useNotifications } from "@/hooks/useNotifications";
+import { useWallet } from "@/context/WalletContext";
 
 interface InvoiceItem {
   id: string;
@@ -40,19 +41,32 @@ interface InvoiceItem {
 
 export default function NewInvoicePage() {
   const router = useRouter();
+  const { ethAddress, stacksAddress, ethTruncatedAddress, stacksTruncatedAddress } = useWallet();
   const [items, setItems] = useState<InvoiceItem[]>([
     { id: "1", description: "", quantity: 1, price: 0 },
   ]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [network, setNetwork] = useState("Stacks");
+  const [receivingNetwork, setReceivingNetwork] = useState("Ethereum");
+  const [isCustomReceivingNetwork, setIsCustomReceivingNetwork] = useState(false);
   const [generatedLink, setGeneratedLink] = useState<string | null>(null);
   const [qrCodeUrl, setQrCodeUrl] = useState<string | null>(null);
   const [isCopied, setIsCopied] = useState(false);
 
    // Form fields for invoice encoding
   const [clientWallet, setClientWallet] = useState("");
+  const [clientName, setClientName] = useState("");
   const [invoiceMemo, setInvoiceMemo] = useState("");
   const [invoiceDate, setInvoiceDate] = useState(""); // ISO date string from date picker
+
+  // Auto-fill wallet address based on network
+  const connectedReceivingAddress = receivingNetwork === "Ethereum" ? ethAddress : stacksAddress;
+
+  const handleUseConnectedWallet = () => {
+    if (connectedReceivingAddress) {
+      setClientWallet(connectedReceivingAddress);
+    }
+  };
 
   // History hook for persisting generated invoices
   const { saveInvoice } = useInvoiceHistory();
@@ -115,6 +129,7 @@ export default function NewInvoicePage() {
 
     // Convert network to url-state format: "Stacks" -> "stacks", "Ethereum" -> "ethereum"
     const networkParam = network.toLowerCase() as "stacks" | "ethereum";
+    const targetNetworkParam = receivingNetwork.toLowerCase() as "stacks" | "ethereum";
 
     // Create createdAt from the date picker or use current date
     const createdAt = invoiceDate
@@ -133,6 +148,7 @@ export default function NewInvoicePage() {
         memo: invoiceMemo || itemDescriptions.slice(0, 50) || undefined,
         token: tokenSymbol,
         network: networkParam,
+        targetNetwork: targetNetworkParam,
         createdAt,
       },
       origin,
@@ -262,22 +278,40 @@ export default function NewInvoicePage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                   <div className="space-y-4">
                     <label className="text-[10px] font-black text-muted uppercase tracking-widest pl-1">
-                      Client Information
+                      Billing Information
                     </label>
                     <input
                       type="text"
-                      placeholder="Client Name or Organization"
+                      placeholder="Client or Project Name"
+                      value={clientName}
+                      onChange={(e) => setClientName(e.target.value)}
                       className="w-full px-6 py-4 bg-sidebar border border-border-subtle rounded-2xl text-sm font-bold text-foreground focus:outline-none focus:ring-2 focus:ring-brand-orange/20 transition-all"
                       required
                     />
-                    <input
-                      type="text"
-                      placeholder="Client Wallet Address (Stacks or ETH)"
-                      value={clientWallet}
-                      onChange={(e) => setClientWallet(e.target.value)}
-                      className="w-full px-6 py-4 bg-sidebar border border-border-subtle rounded-2xl text-xs font-mono font-bold text-foreground focus:outline-none focus:ring-2 focus:ring-brand-orange/20 transition-all"
-                      required
-                    />
+                    <div className="space-y-2">
+                       <div className="flex justify-between items-center px-1">
+                         <label className="text-[10px] font-black text-muted uppercase tracking-widest leading-none">
+                           Your Receiving Wallet ({receivingNetwork})
+                         </label>
+                         {connectedReceivingAddress && (
+                           <button 
+                             type="button" 
+                             onClick={handleUseConnectedWallet}
+                             className={`text-[9px] font-black ${network === "Stacks" ? "text-brand-blue" : "text-brand-orange"} uppercase tracking-tight hover:underline cursor-pointer whitespace-nowrap`}
+                           >
+                             Use Connected
+                           </button>
+                         )}
+                       </div>
+                      <input
+                        type="text"
+                        placeholder={`Address to receive funds on ${receivingNetwork}`}
+                        value={clientWallet}
+                        onChange={(e) => setClientWallet(e.target.value)}
+                        className="w-full px-6 py-4 bg-sidebar border border-border-subtle rounded-2xl text-xs font-mono font-bold text-foreground focus:outline-none focus:ring-2 focus:ring-brand-orange/20 transition-all"
+                        required
+                      />
+                    </div>
                   </div>
                   <div className="space-y-4">
                     <label className="text-[10px] font-black text-muted uppercase tracking-widest pl-1">
@@ -451,98 +485,142 @@ export default function NewInvoicePage() {
               transition={{ delay: 0.1 }}
               className="bg-card border border-border-subtle rounded-[32px] p-8 dark:shadow-dark-sleek"
             >
-              <h3 className="text-sm font-black text-foreground uppercase tracking-widest mb-6 border-b border-border-subtle pb-4">
-                Payment Network
-              </h3>
-
-              <div className="space-y-3">
-                <button
-                  type="button"
-                  onClick={() => setNetwork("Stacks")}
-                  className={`w-full flex items-center justify-between p-4 rounded-2xl border transition-all cursor-pointer ${
-                    network === "Stacks"
-                      ? "bg-brand-orange/5 border-brand-orange shadow-sm text-brand-orange"
-                      : "bg-sidebar border-border-subtle text-muted hover:border-sidebar-hover dark:hover:border-zinc-700"
-                  }`}
-                >
-                  <div className="flex items-center gap-3">
-                    <div
-                      className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${
+              <div className="space-y-6">
+                <div>
+                  <h4 className="text-[10px] font-black text-muted uppercase tracking-[0.2em] mb-4">
+                    Payer Uses (Source)
+                  </h4>
+                  <div className="grid grid-cols-2 gap-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setNetwork("Stacks");
+                        if (!isCustomReceivingNetwork) setReceivingNetwork("Ethereum");
+                      }}
+                      className={`flex items-center justify-between p-3 rounded-xl border transition-all cursor-pointer ${
                         network === "Stacks"
-                          ? "bg-brand-orange text-white"
-                          : "bg-sidebar text-muted"
+                          ? "bg-brand-orange/5 border-brand-orange text-brand-orange"
+                          : "bg-sidebar border-border-subtle text-muted hover:border-sidebar-hover dark:hover:border-zinc-700"
                       }`}
                     >
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
-                        src="https://cryptologos.cc/logos/stacks-stx-logo.png"
-                        className={`w-4 h-4 ${
-                          network === "Stacks" ? "brightness-0 invert" : ""
-                        }`}
-                        alt="Stacks logo"
-                      />
-                    </div>
-                    <span className="text-sm font-bold">Stacks Network</span>
-                  </div>
-                  {network === "Stacks" && (
-                    <div className="w-2 h-2 rounded-full bg-brand-orange" />
-                  )}
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => setNetwork("Ethereum")}
-                  className={`w-full flex items-center justify-between p-4 rounded-2xl border transition-all cursor-pointer ${
-                    network === "Ethereum"
-                      ? "bg-brand-blue/5 border-brand-blue shadow-sm text-brand-blue"
-                      : "bg-sidebar border-border-subtle text-muted hover:border-sidebar-hover dark:hover:border-zinc-700"
-                  }`}
-                >
-                  <div className="flex items-center gap-3">
-                    <div
-                      className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${
+                      <span className="text-xs font-bold">Stacks</span>
+                      {network === "Stacks" && <div className="w-1.5 h-1.5 rounded-full bg-brand-orange" />}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setNetwork("Ethereum");
+                        if (!isCustomReceivingNetwork) setReceivingNetwork("Stacks");
+                      }}
+                      className={`flex items-center justify-between p-3 rounded-xl border transition-all cursor-pointer ${
                         network === "Ethereum"
-                          ? "bg-brand-blue text-white"
-                          : "bg-sidebar text-muted"
+                          ? "bg-brand-blue/5 border-brand-blue text-brand-blue"
+                          : "bg-sidebar border-border-subtle text-muted hover:border-sidebar-hover dark:hover:border-zinc-700"
                       }`}
                     >
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
-                        src="https://cryptologos.cc/logos/ethereum-eth-logo.png"
-                        className={`w-4 h-4 ${
-                          network === "Ethereum" ? "brightness-0 invert" : ""
-                        }`}
-                        alt="Ethereum logo"
-                      />
-                    </div>
-                    <span className="text-sm font-bold">Ethereum Mainnet</span>
+                      <span className="text-xs font-bold">Ethereum</span>
+                      {network === "Ethereum" && <div className="w-1.5 h-1.5 rounded-full bg-brand-blue" />}
+                    </button>
                   </div>
-                  {network === "Ethereum" && (
-                    <div className="w-2 h-2 rounded-full bg-brand-blue" />
-                  )}
-                </button>
+                </div>
+
+                <div>
+                  <h4 className="text-[10px] font-black text-muted uppercase tracking-[0.2em] mb-4">
+                    You Receive (Settlement)
+                  </h4>
+                  <div className="grid grid-cols-2 gap-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setReceivingNetwork("Stacks");
+                        setIsCustomReceivingNetwork(true);
+                      }}
+                      className={`flex items-center justify-between p-3 rounded-xl border transition-all cursor-pointer ${
+                        receivingNetwork === "Stacks"
+                          ? "bg-brand-orange/5 border-brand-orange text-brand-orange"
+                          : "bg-sidebar border-border-subtle text-muted hover:border-sidebar-hover dark:hover:border-zinc-700"
+                      }`}
+                    >
+                      <span className="text-xs font-bold">USDCx</span>
+                      {receivingNetwork === "Stacks" && <div className="w-1.5 h-1.5 rounded-full bg-brand-orange" />}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setReceivingNetwork("Ethereum");
+                        setIsCustomReceivingNetwork(true);
+                      }}
+                      className={`flex items-center justify-between p-3 rounded-xl border transition-all cursor-pointer ${
+                        receivingNetwork === "Ethereum"
+                          ? "bg-brand-blue/5 border-brand-blue text-brand-blue"
+                          : "bg-sidebar border-border-subtle text-muted hover:border-sidebar-hover dark:hover:border-zinc-700"
+                      }`}
+                    >
+                      <span className="text-xs font-bold">USDC</span>
+                      {receivingNetwork === "Ethereum" && <div className="w-1.5 h-1.5 rounded-full bg-brand-blue" />}
+                    </button>
+                  </div>
+                </div>
               </div>
 
-              <div className="mt-8 p-5 bg-sidebar/50 rounded-2xl border border-dashed border-border-subtle space-y-4">
-                <div className="flex gap-3">
-                  <Zap
-                    size={14}
-                    className="text-brand-orange shrink-0 mt-0.5"
-                  />
-                  <p className="text-[10px] font-bold text-muted leading-relaxed uppercase tracking-tight">
-                    Invoices are secured by Bitcoin finality via xReserve smart
-                    contracts.
-                  </p>
+              <div className="mt-8 space-y-4">
+                <h4 className="text-[10px] font-black text-muted uppercase tracking-[0.2em] border-b border-white/5 pb-2">
+                  Transaction Path
+                </h4>
+                <div className="bg-sidebar/50 rounded-2xl p-5 border border-border-subtle space-y-5">
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-1">
+                      <p className="text-[9px] font-black text-muted uppercase tracking-widest">Payer Sends</p>
+                      <div className="flex items-center gap-2">
+                        <div className={`w-2 h-2 rounded-full ${network === "Stacks" ? "bg-brand-orange" : "bg-brand-blue"}`} />
+                        <p className="text-xs font-black">{network}</p>
+                      </div>
+                    </div>
+                    <div className="flex flex-col items-center px-4">
+                      {network === receivingNetwork ? (
+                        <div className="text-[8px] font-bold text-muted rotate-90 whitespace-nowrap">LOCAL</div>
+                      ) : (
+                        <Zap size={10} className="text-brand-orange animate-pulse" />
+                      )}
+                      <div className="w-px h-6 bg-linear-to-b from-border-subtle via-brand-orange/40 to-border-subtle my-1" />
+                    </div>
+                    <div className="space-y-1 text-right">
+                      <p className="text-[9px] font-black text-muted uppercase tracking-widest">You Receive</p>
+                      <div className="flex items-center gap-2 justify-end">
+                        <p className="text-xs font-black">{receivingNetwork}</p>
+                        <div className={`w-2 h-2 rounded-full ${receivingNetwork === "Stacks" ? "bg-brand-orange" : "bg-brand-blue"}`} />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="pt-4 border-t border-white/5">
+                    <div className="flex gap-3">
+                      {network === receivingNetwork ? (
+                         <div className="w-3 h-3 rounded-full bg-muted/20 flex items-center justify-center shrink-0 mt-0.5">
+                           <div className="w-1 h-1 rounded-full bg-muted" />
+                         </div>
+                      ) : (
+                        <ShieldCheck size={12} className="text-brand-orange shrink-0 mt-0.5" />
+                      )}
+                      <p className="text-[9px] font-bold text-muted leading-relaxed uppercase tracking-tight">
+                        {network === receivingNetwork 
+                          ? "Direct settlement on the same network. No bridge protocol required."
+                          : "xReserve protocol handles the cross-chain liquidity & settlement automatically."}
+                      </p>
+                    </div>
+                  </div>
                 </div>
-                <div className="flex gap-3">
-                  <ShieldCheck
-                    size={14}
-                    className="text-brand-orange shrink-0 mt-0.5"
-                  />
-                  <p className="text-[10px] font-bold text-muted leading-relaxed uppercase tracking-tight">
-                    Platform fee: 0% for standard tiers.
-                  </p>
-                </div>
+              </div>
+
+              <div className="mt-8 p-5 bg-sidebar/50 rounded-2xl border border-dashed border-border-subtle flex items-start gap-3">
+                <Zap
+                  size={14}
+                  className="text-brand-orange shrink-0 mt-0.5"
+                />
+                <p className="text-[10px] font-bold text-muted leading-relaxed uppercase tracking-tight">
+                  Invoices are secured by Bitcoin finality via xReserve smart
+                  contracts.
+                </p>
               </div>
             </motion.div>
 

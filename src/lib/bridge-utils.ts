@@ -328,7 +328,7 @@ export function formatTokenAmount(amount: bigint, decimals = 6): string {
  * Uses raw ABI encoding for browser wallet compatibility.
  */
 export function encodeFunctionData(
-  functionName: "approve" | "depositToRemote",
+  functionName: "approve" | "depositToRemote" | "transfer",
   args: unknown[],
 ): `0x${string}` {
   if (functionName === "approve") {
@@ -338,6 +338,15 @@ export function encodeFunctionData(
     const spenderPadded = (spender as string).slice(2).padStart(64, "0");
     const amountHex = amount.toString(16).padStart(64, "0");
     return `0x095ea7b3${spenderPadded}${amountHex}` as `0x${string}`;
+  }
+
+  if (functionName === "transfer") {
+    // transfer(address recipient, uint256 amount)
+    // Function selector: 0xa9059cbb
+    const [recipient, amount] = args as [string, bigint];
+    const recipientPadded = (recipient as string).slice(2).padStart(64, "0");
+    const amountHex = amount.toString(16).padStart(64, "0");
+    return `0xa9059cbb${recipientPadded}${amountHex}` as `0x${string}`;
   }
 
   if (functionName === "depositToRemote") {
@@ -379,7 +388,11 @@ export function encodeFunctionData(
 // TYPES
 // ============================================================================
 
-export type BridgeDirection = "eth-to-stacks" | "stacks-to-eth";
+export type BridgeDirection = 
+  | "eth-to-stacks" 
+  | "stacks-to-eth" 
+  | "stacks-to-stacks" 
+  | "eth-to-eth";
 
 export interface BridgeParams {
   direction: BridgeDirection;

@@ -20,6 +20,7 @@ import { decodeInvoice, InvoiceData } from "@/lib/url-state";
 import { useWallet } from "@/context/WalletContext";
 import { useBridge } from "@/hooks/useBridge";
 import { useInvoiceHistory } from "@/hooks/useInvoiceHistory";
+import { BridgeDirection } from "@/lib/bridge-utils";
 
 /**
  * Wrapper component that provides Suspense boundary for useSearchParams.
@@ -202,10 +203,16 @@ function ValidInvoiceUI({ data }: { data: InvoiceData }) {
     }
 
     try {
-      // Use bridge to send payment
-      // Direction depends on which network payer is using
-      const direction =
-        payerNetwork === "stacks" ? "stacks-to-eth" : "eth-to-stacks";
+      // Determine target network (default to cross-chain if not specified)
+      const targetNetwork = data.targetNetwork || (payerNetwork === "stacks" ? "ethereum" : "stacks");
+      
+      // Determine bridge direction
+      let direction: BridgeDirection;
+      if (payerNetwork === "stacks") {
+        direction = targetNetwork === "stacks" ? "stacks-to-stacks" : "stacks-to-eth";
+      } else {
+        direction = targetNetwork === "ethereum" ? "eth-to-eth" : "eth-to-stacks";
+      }
 
       await bridge(direction, data.amount, data.recipient);
     } catch (err) {
@@ -356,8 +363,13 @@ function ValidInvoiceUI({ data }: { data: InvoiceData }) {
                   <span className="text-sm text-muted">
                     Merchant receives on
                   </span>
-                  <span className="text-sm font-mono text-right max-w-[180px] truncate">
-                    {data.recipient}
+                  <span className="text-sm font-bold flex items-center gap-2">
+                    <div
+                      className={`w-3 h-3 rounded-full ${(data.targetNetwork || (payerNetwork === "stacks" ? "ethereum" : "stacks")) === "stacks" ? "bg-brand-orange" : "bg-brand-blue"} flex items-center justify-center`}
+                    >
+                      <div className="w-1 h-1 rounded-full bg-white" />
+                    </div>
+                    {(data.targetNetwork || (payerNetwork === "stacks" ? "ethereum" : "stacks")).charAt(0).toUpperCase() + (data.targetNetwork || (payerNetwork === "stacks" ? "ethereum" : "stacks")).slice(1)}
                   </span>
                 </div>
 

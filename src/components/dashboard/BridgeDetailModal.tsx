@@ -117,7 +117,7 @@ export function BridgeDetailModal({
                   />
                   <div className="ml-4 h-6 border-l-2 border-dashed border-gray-100 relative">
                     <div className="absolute top-1/2 -left-[9px] -translate-y-1/2 w-4 h-4 rounded-full bg-card border border-border-subtle flex items-center justify-center">
-                      <div className="w-1.5 h-1.5 rounded-full bg-brand-orange" />
+                      <div className={`w-1.5 h-1.5 rounded-full ${transaction.to === "Stacks" ? "bg-brand-orange shadow-[0_0_8px_rgba(255,138,0,0.5)]" : "bg-brand-blue shadow-[0_0_8px_rgba(0,209,255,0.5)]"}`} />
                     </div>
                   </div>
                   <FlowStep

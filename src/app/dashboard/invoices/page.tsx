@@ -411,7 +411,7 @@ export default function InvoicesPage() {
                         <td className="py-5 px-6">
                           <div className="flex items-center gap-2">
                             <div
-                              className={`w-1.5 h-1.5 rounded-full ${networkDisplay === "Stacks" ? "bg-[#5546FF]" : "bg-[#627EEA]"}`}
+                              className={`w-1.5 h-1.5 rounded-full ${networkDisplay === "Stacks" ? "bg-brand-orange shadow-[0_0_8px_rgba(255,138,0,0.4)]" : "bg-brand-blue shadow-[0_0_8px_rgba(0,209,255,0.4)]"}`}
                             />
                             <span className="text-sm font-bold text-muted">
                               {networkDisplay}
@@ -494,7 +494,7 @@ export default function InvoicesPage() {
                       <div className="flex items-center gap-3">
                         <div className="flex items-center gap-1.5">
                           <div
-                            className={`w-1.5 h-1.5 rounded-full ${networkDisplay === "Stacks" ? "bg-[#5546FF]" : "bg-[#627EEA]"}`}
+                            className={`w-1.5 h-1.5 rounded-full ${networkDisplay === "Stacks" ? "bg-brand-orange shadow-[0_0_8px_rgba(255,138,0,0.4)]" : "bg-brand-blue shadow-[0_0_8px_rgba(0,209,255,0.4)]"}`}
                           />
                           <span className="text-xs font-medium text-muted">
                             {networkDisplay}

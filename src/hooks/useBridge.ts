@@ -18,7 +18,13 @@ import {
   type BridgeResult,
 } from "@/lib/bridge-utils";
 import { openContractCall } from "@stacks/connect";
-import { uintCV, bufferCV, PostConditionMode } from "@stacks/transactions";
+import {
+  uintCV,
+  bufferCV,
+  standardPrincipalCV,
+  noneCV,
+  PostConditionMode,
+} from "@stacks/transactions";
 import type { FungiblePostCondition } from "@stacks/transactions";
 
 // ============================================================================
@@ -408,47 +414,21 @@ export function useBridge() {
    */
   const bridgeEthToStacks = useCallback(
     async (amount: string, recipient: string): Promise<BridgeResult> => {
-      if (!ethConnected || !ethAddress) {
-        return { success: false, error: "Ethereum wallet not connected" };
-      }
-
+      if (!ethConnected || !ethAddress)
+        return { success: false, error: "Wallet not connected" };
       const ethereum = getEthereumProvider();
-      if (!ethereum) {
-        return { success: false, error: "No Ethereum provider found" };
-      }
-
-      // Validate inputs
-      const recipientError = validateRecipient(recipient, "eth-to-stacks");
-      if (recipientError) {
-        return { success: false, error: recipientError };
-      }
-
-      const amountError = validateAmount(amount);
-      if (amountError) {
-        return { success: false, error: amountError };
-      }
+      if (!ethereum) return { success: false, error: "No provider" };
 
       setState((s) => ({ ...s, status: "bridging", error: null }));
-
       try {
         const amountInUnits = parseTokenAmount(amount, USDC_SEPOLIA.decimals);
         const recipientBytes32 = stacksAddressToBytes32(recipient);
-
-        // Encode depositToRemote call
-        // depositToRemote(uint256 amount, uint32 destinationDomain, bytes32 mintRecipient, address burnToken, uint256 maxFee, bytes hookData)
         const amountHex = amountInUnits.toString(16).padStart(64, "0");
         const domainHex = DOMAIN_IDS.STACKS.toString(16).padStart(64, "0");
         const recipientHex = recipientBytes32.slice(2);
         const tokenHex = USDC_SEPOLIA.address.slice(2).padStart(64, "0");
-        const feeHex = "0".padStart(64, "0"); // maxFee = 0
-        // Hook data offset and length
-        const hookOffset = (6 * 32).toString(16).padStart(64, "0"); // 0xc0
-        const hookLength = "0".padStart(64, "0");
-
-        // Function selector for depositToRemote(uint256,uint32,bytes32,address,uint256,bytes)
-        // Computed as: keccak256("depositToRemote(uint256,uint32,bytes32,address,uint256,bytes)").slice(0,10)
         const selector = "0xfaadb53b";
-        const data = `${selector}${amountHex}${domainHex}${recipientHex}${tokenHex}${feeHex}${hookOffset}${hookLength}`;
+        const data = `${selector}${amountHex}${domainHex}${recipientHex}${tokenHex}${"0".padStart(64, "0")}${(6 * 32).toString(16).padStart(64, "0")}${"0".padStart(64, "0")}`;
 
         const txHash = (await ethereum.request({
           method: "eth_sendTransaction",
@@ -457,50 +437,60 @@ export function useBridge() {
               from: ethAddress,
               to: XRESERVE_CONTRACT.address,
               data,
-              gas: "0x493E0", // 300000 gas - enough for bridge call
+              gas: "0x493E0",
             },
           ],
         })) as string;
 
-        setState((s) => ({
-          ...s,
-          status: "success",
-          txHash,
-        }));
-
+        setState((s) => ({ ...s, status: "success", txHash }));
         return { success: true, txHash };
       } catch (error) {
-        console.error("Bridge error:", error);
-        let message = "Bridge transaction failed";
-        if (error instanceof Error) {
-          message = error.message;
-        } else if (
-          typeof error === "object" &&
-          error !== null &&
-          "message" in error
-        ) {
-          message = String((error as { message: unknown }).message);
-        }
-        setState((s) => ({
-          ...s,
-          status: "error",
-          error:
-            message.includes("rejected") || message.includes("denied")
-              ? "Transaction rejected by user"
-              : message.includes("insufficient")
-                ? "Insufficient USDC balance"
-                : message,
-        }));
-        return { success: false, error: message };
+        const msg = error instanceof Error ? error.message : "Failed";
+        setState((s) => ({ ...s, status: "error", error: msg }));
+        return { success: false, error: msg };
       }
     },
-    [
-      ethConnected,
-      ethAddress,
-      getEthereumProvider,
-      validateRecipient,
-      validateAmount,
-    ],
+    [ethConnected, ethAddress, getEthereumProvider],
+  );
+
+  /**
+   * Transfers USDC from Ethereum to Ethereum (Local)
+   */
+  const bridgeEthToEth = useCallback(
+    async (amount: string, recipient: string): Promise<BridgeResult> => {
+      if (!ethConnected || !ethAddress)
+        return { success: false, error: "Wallet not connected" };
+      const ethereum = getEthereumProvider();
+      if (!ethereum) return { success: false, error: "No provider" };
+
+      setState((s) => ({ ...s, status: "bridging", error: null }));
+      try {
+        const amountInUnits = parseTokenAmount(amount, USDC_SEPOLIA.decimals);
+        const amountHex = amountInUnits.toString(16).padStart(64, "0");
+        const recipientPadded = recipient.slice(2).padStart(64, "0");
+        const data = `0xa9059cbb${recipientPadded}${amountHex}`;
+
+        const txHash = (await ethereum.request({
+          method: "eth_sendTransaction",
+          params: [
+            {
+              from: ethAddress,
+              to: USDC_SEPOLIA.address,
+              data,
+              gas: "0x186A0",
+            },
+          ],
+        })) as string;
+
+        setState((s) => ({ ...s, status: "success", txHash }));
+        return { success: true, txHash };
+      } catch (error) {
+        const msg = error instanceof Error ? error.message : "Failed";
+        setState((s) => ({ ...s, status: "error", error: msg }));
+        return { success: false, error: msg };
+      }
+    },
+    [ethConnected, ethAddress, getEthereumProvider],
   );
 
   /**
@@ -508,88 +498,103 @@ export function useBridge() {
    */
   const bridgeStacksToEth = useCallback(
     async (amount: string, recipient: string): Promise<BridgeResult> => {
-      if (!stacksConnected || !stacksAddress) {
-        return { success: false, error: "Stacks wallet not connected" };
-      }
-
-      // Validate inputs
-      const recipientError = validateRecipient(recipient, "stacks-to-eth");
-      if (recipientError) {
-        return { success: false, error: recipientError };
-      }
-
-      const amountError = validateAmount(amount);
-      if (amountError) {
-        return { success: false, error: amountError };
-      }
-
+      if (!stacksConnected || !stacksAddress)
+        return { success: false, error: "Wallet not connected" };
       setState((s) => ({ ...s, status: "bridging", error: null }));
-
       try {
         const amountInUnits = parseTokenAmount(amount, USDCX_STACKS.decimals);
-
-        // Convert Ethereum recipient address to bytes32 buffer
         const recipientBuffer = ethereumAddressToBuffer(recipient);
-
-        // Create post condition for the token burn
-        // The usdcx-v1 contract burns USDCx tokens via protocol-burn on .usdcx
         const postCondition: FungiblePostCondition = {
           type: "ft-postcondition",
           address: stacksAddress,
-          condition: "lte", // less than or equal
-          // Asset is the USDCx token contract with token name 'usdcx-token'
+          condition: "lte",
           asset: `${USDCX_STACKS.principal}::usdcx-token`,
           amount: amountInUnits,
         };
 
         return new Promise((resolve) => {
           openContractCall({
-            // Call the xReserve bridge contract (usdcx-v1)
             contractAddress: XRESERVE_STACKS_CONTRACT.address,
             contractName: XRESERVE_STACKS_CONTRACT.name,
-            // burn(amount, native-domain, native-recipient)
-            // native-domain must be 0 for Ethereum
             functionName: "burn",
             functionArgs: [
-              uintCV(amountInUnits), // amount to burn/bridge
-              uintCV(DOMAIN_IDS.ETHEREUM), // native-domain (Ethereum = 0)
-              bufferCV(recipientBuffer), // native-recipient (ETH address as bytes32)
+              uintCV(amountInUnits),
+              uintCV(DOMAIN_IDS.ETHEREUM),
+              bufferCV(recipientBuffer),
             ],
-            // Specify testnet network to find the contract
             network: "testnet",
             postConditionMode: PostConditionMode.Deny,
             postConditions: [postCondition],
             onFinish: (data) => {
-              const txId = data.txId;
-              setState((s) => ({
-                ...s,
-                status: "success",
-                txHash: txId,
-              }));
-              resolve({ success: true, txHash: txId });
+              setState((s) => ({ ...s, status: "success", txHash: data.txId }));
+              resolve({ success: true, txHash: data.txId });
             },
             onCancel: () => {
-              setState((s) => ({
-                ...s,
-                status: "error",
-                error: "Transaction cancelled by user",
-              }));
-              resolve({ success: false, error: "Transaction cancelled" });
+              setState((s) => ({ ...s, status: "error", error: "Cancelled" }));
+              resolve({ success: false, error: "Cancelled" });
             },
           });
         });
       } catch (error) {
-        const message =
-          error instanceof Error ? error.message : "Bridge transaction failed";
-        setState((s) => ({
-          ...s,
-          status: "error",
-          error: message,
-        }));
-        return { success: false, error: message };
+        const msg = error instanceof Error ? error.message : "Failed";
+        setState((s) => ({ ...s, status: "error", error: msg }));
+        return { success: false, error: msg };
       }
     },
-    [stacksConnected, stacksAddress, validateRecipient, validateAmount],
+    [stacksConnected, stacksAddress],
+  );
+
+  /**
+   * Transfers USDCx from Stacks to Stacks (Local)
+   */
+  const bridgeStacksToStacks = useCallback(
+    async (amount: string, recipient: string): Promise<BridgeResult> => {
+      if (!stacksConnected || !stacksAddress)
+        return { success: false, error: "Wallet not connected" };
+      setState((s) => ({ ...s, status: "bridging", error: null }));
+      try {
+        const amountInUnits = parseTokenAmount(amount, USDCX_STACKS.decimals);
+        const [contractAddress, contractName] =
+          USDCX_STACKS.principal.split(".");
+        const postCondition: FungiblePostCondition = {
+          type: "ft-postcondition",
+          address: stacksAddress,
+          condition: "lte",
+          asset: `${USDCX_STACKS.principal}::usdcx-token`,
+          amount: amountInUnits,
+        };
+
+        return new Promise((resolve) => {
+          openContractCall({
+            contractAddress,
+            contractName,
+            functionName: "transfer",
+            functionArgs: [
+              uintCV(amountInUnits),
+              standardPrincipalCV(stacksAddress), // Sender
+              standardPrincipalCV(recipient), // Recipient
+              noneCV(), // Optional memo (none)
+            ],
+            network: "testnet",
+            postConditionMode: PostConditionMode.Deny,
+            postConditions: [postCondition],
+            onFinish: (data) => {
+              setState((s) => ({ ...s, status: "success", txHash: data.txId }));
+              resolve({ success: true, txHash: data.txId });
+            },
+            onCancel: () => {
+              setState((s) => ({ ...s, status: "error", error: "Cancelled" }));
+              resolve({ success: false, error: "Cancelled" });
+            },
+          });
+        });
+      } catch (error) {
+        const msg = error instanceof Error ? error.message : "Failed";
+        setState((s) => ({ ...s, status: "error", error: msg }));
+        return { success: false, error: msg };
+      }
+    },
+    [stacksConnected, stacksAddress],
   );
 
   /**
@@ -601,13 +606,25 @@ export function useBridge() {
       amount: string,
       recipient: string,
     ): Promise<BridgeResult> => {
-      if (direction === "eth-to-stacks") {
-        return bridgeEthToStacks(amount, recipient);
-      } else {
-        return bridgeStacksToEth(amount, recipient);
+      switch (direction) {
+        case "eth-to-stacks":
+          return bridgeEthToStacks(amount, recipient);
+        case "stacks-to-eth":
+          return bridgeStacksToEth(amount, recipient);
+        case "stacks-to-stacks":
+          return bridgeStacksToStacks(amount, recipient);
+        case "eth-to-eth":
+          return bridgeEthToEth(amount, recipient);
+        default:
+          return { success: false, error: "Invalid direction" };
       }
     },
-    [bridgeEthToStacks, bridgeStacksToEth],
+    [
+      bridgeEthToStacks,
+      bridgeStacksToEth,
+      bridgeEthToEth,
+      bridgeStacksToStacks,
+    ],
   );
 
   return {

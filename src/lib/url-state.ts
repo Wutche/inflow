@@ -85,6 +85,12 @@ export const InvoiceSchema = z.object({
   network: z.enum(["stacks", "ethereum"]).default("stacks"),
 
   /**
+   * The destination network - which chain the recipient will receive on.
+   * If omitted, it defaults to the "other" network for cross-chain settlement.
+   */
+  targetNetwork: z.enum(["stacks", "ethereum"]).optional(),
+
+  /**
    * ISO 8601 date string when the invoice was created.
    * Using simple string validation since datetime() is too strict.
    */
@@ -155,31 +161,9 @@ export function encodeInvoice(data: InvoiceInput): string {
 
 /**
  * Decodes a Base64 URL token back into validated invoice data.
- *
- * This function is designed to be completely safe:
- * - It will NEVER throw an exception.
- * - It returns `null` for ANY invalid input (malformed Base64, invalid JSON,
- *   schema validation failure, etc.).
- *
- * The decoding process:
- * 1. Restore standard Base64 characters from URL-safe format.
- * 2. Add back any missing padding (=).
- * 3. Decode Base64 to binary string.
- * 4. Convert binary string to UTF-8 bytes.
- * 5. Decode UTF-8 bytes to a string.
- * 6. Parse JSON.
- * 7. Validate against InvoiceSchema.
- *
  * @param token - The Base64 encoded string from the URL, or null.
  * @returns Validated InvoiceData if successful, `null` otherwise.
  *
- * @example
- * const data = decodeInvoice(searchParams.get('i'));
- * if (data === null) {
- *   // Show "Invalid or Corrupted Invoice Link" message
- *   return <ErrorUI />;
- * }
- * // data is now typed as InvoiceData
  */
 export function decodeInvoice(token: string | null): InvoiceData | null {
   // Guard: null or empty token
@@ -188,29 +172,29 @@ export function decodeInvoice(token: string | null): InvoiceData | null {
   }
 
   try {
-    // Step 1: Restore standard Base64 from URL-safe format
+    // Restore standard Base64 from URL-safe format
     let base64 = token.replace(/-/g, "+").replace(/_/g, "/");
 
-    // Step 2: Add padding if necessary (Base64 strings must have length % 4 === 0)
+    // Add padding if necessary (Base64 strings must have length % 4 === 0)
     const paddingNeeded = (4 - (base64.length % 4)) % 4;
     base64 += "=".repeat(paddingNeeded);
 
-    // Step 3: Decode Base64 to binary string
+    // Decode Base64 to binary string
     const binaryString = atob(base64);
 
-    // Step 4: Convert binary string to UTF-8 byte array
+    //  Convert binary string to UTF-8 byte array
     const utf8Bytes = new Uint8Array(binaryString.length);
     for (let i = 0; i < binaryString.length; i++) {
       utf8Bytes[i] = binaryString.charCodeAt(i);
     }
 
-    // Step 5: Decode UTF-8 bytes to string
+    // Decode UTF-8 bytes to string
     const jsonString = new TextDecoder("utf-8").decode(utf8Bytes);
 
-    // Step 6: Parse JSON
+    //  Parse JSON
     const parsed: unknown = JSON.parse(jsonString);
 
-    // Step 7: Validate against schema
+    //  Validate against schema
     const result = InvoiceSchema.safeParse(parsed);
 
     if (!result.success) {
@@ -239,11 +223,6 @@ export function decodeInvoice(token: string | null): InvoiceData | null {
  * @returns A complete URL string like "/pay?i=eyJ..."
  *
  * @example
- * const paymentUrl = createPaymentUrl({
- *   recipient: 'ST1...',
- *   amount: '50'
- * });
- * // Returns: "/pay?i=eyJyZWNpcGllbnQi..."
  */
 export function createPaymentUrl(data: InvoiceInput, baseUrl = ""): string {
   const encoded = encodeInvoice(data);

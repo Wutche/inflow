@@ -32,7 +32,7 @@ export function AuthGuard({ children }: AuthGuardProps) {
 
   if (isChecking) {
     return (
-      <div className="min-h-screen bg-[#F8F9FB] flex items-center justify-center">
+      <div className="min-h-screen bg-background flex items-center justify-center">
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}

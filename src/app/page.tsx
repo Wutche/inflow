@@ -10,6 +10,7 @@ import {
   Globe,
   Database,
   Wallet,
+  Sparkles,
 } from "lucide-react";
 import Link from "next/link";
 import { useState, useEffect, type ElementType } from "react";
@@ -56,47 +57,92 @@ export default function LandingPage() {
         {/* Hero Section */}
         <section className="relative min-h-[90vh] flex items-center pt-32 pb-32 px-6 overflow-hidden">
           {/* Extreme-Contrast Logo-Inspired Mesh Background */}
-          <div className="absolute inset-0 -z-10 overflow-visible pointer-events-none">
+          <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
             {/* Orange gradient - top right */}
             <div
-              className="absolute top-[-20%] right-[-10%] w-[1400px] h-[1400px] rounded-full"
+              className="absolute top-[-20%] right-[-10%] w-[1400px] h-[1400px] rounded-full opacity-80 dark:opacity-40"
               style={{
                 background:
-                  "radial-gradient(circle, rgba(255, 138, 0, var(--mesh-opacity-orange-primary)) 0%, rgba(255, 180, 100, var(--mesh-opacity-orange-secondary)) 40%, transparent 70%)",
-                filter: "blur(100px)",
+                  "radial-gradient(circle, rgba(255, 138, 0, 0.8) 0%, rgba(255, 180, 100, 0.4) 40%, transparent 70%)",
+                filter: "blur(140px)",
               }}
             />
             {/* Cyan/Teal gradient - bottom left */}
             <div
-              className="absolute bottom-[-30%] left-[-15%] w-[1600px] h-[1600px] rounded-full"
+              className="absolute bottom-[-30%] left-[-15%] w-[1600px] h-[1600px] rounded-full opacity-70 dark:opacity-30"
               style={{
                 background:
-                  "radial-gradient(circle, rgba(0, 209, 255, var(--mesh-opacity-cyan-primary)) 0%, rgba(100, 220, 255, var(--mesh-opacity-cyan-secondary)) 40%, transparent 70%)",
-                filter: "blur(100px)",
+                  "radial-gradient(circle, rgba(0, 209, 255, 0.8) 0%, rgba(100, 220, 255, 0.4) 40%, transparent 70%)",
+                filter: "blur(140px)",
               }}
             />
           </div>
 
           <div className="max-w-7xl mx-auto text-center relative z-10">
             <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.5 }}
-              className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand-orange/10 border border-brand-orange/20 text-brand-orange text-xs font-semibold mb-8"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.2 }}
+              className="flex items-center justify-center gap-3 mb-10 cursor-default"
             >
-              <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-orange opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-brand-orange"></span>
+              <div className="h-px w-8 bg-linear-to-r from-transparent to-brand-orange/50" />
+              <span className="text-[10px] sm:text-xs font-mono font-bold tracking-[0.3em] text-brand-orange uppercase">
+                Modern Cross-Chain Invoicing
               </span>
-              Cross-Chain Payments Redefined
+              <div className="h-px w-8 bg-linear-to-l from-transparent to-brand-blue/50" />
             </motion.div>
 
             <motion.h1
               {...fadeInUp}
-              className="text-4xl md:text-6xl font-bold tracking-tight text-foreground mb-6 max-w-5xl mx-auto leading-[1.1] font-heading"
+              className="text-4xl md:text-6xl font-bold tracking-tight text-foreground mb-6 max-w-5xl mx-auto leading-[1.1] font-heading relative"
             >
               Move USDC between{" "}
-              <span className="text-brand-blue">Ethereum</span> and{" "}
+              <span className="relative inline-block">
+                <span className="text-brand-blue">Ethereum</span>
+                {/* Connection Arc SVG */}
+                <svg
+                  className="absolute -top-6 left-1/2 w-[200%] h-12 pointer-events-none hidden md:block"
+                  viewBox="0 0 200 40"
+                  fill="none"
+                  style={{ transform: "translateX(-25%)" }}
+                >
+                  <motion.path
+                    d="M 50 40 Q 100 0 150 40"
+                    stroke="url(#gradient-bridge)"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    initial={{ pathLength: 0, opacity: 0 }}
+                    animate={{ pathLength: 1, opacity: 1 }}
+                    transition={{ duration: 1.5, delay: 0.5 }}
+                  />
+                  <defs>
+                    <linearGradient id="gradient-bridge" x1="0%" y1="0%" x2="100%" y2="0%">
+                      <stop offset="0%" stopColor="var(--color-brand-blue)" stopOpacity="0.2" />
+                      <stop offset="50%" stopColor="var(--color-brand-orange)" stopOpacity="0.5" />
+                      <stop offset="100%" stopColor="var(--color-brand-orange)" stopOpacity="0.2" />
+                    </linearGradient>
+                  </defs>
+                  {/* Flowing particle */}
+                  <motion.circle
+                    r="3"
+                    fill="white"
+                    className="shadow-[0_0_8px_white]"
+                    animate={{
+                      offsetDistance: ["0%", "100%"],
+                      opacity: [0, 1, 1, 0]
+                    }}
+                    transition={{
+                      duration: 3,
+                      repeat: Infinity,
+                      ease: "easeInOut"
+                    }}
+                    style={{
+                      offsetPath: "path('M 50 40 Q 100 0 150 40')",
+                    }}
+                  />
+                </svg>
+              </span>{" "}
+              and{" "}
               <span className="text-brand-orange font-garamond italic">
                 Stacks
               </span>{" "}

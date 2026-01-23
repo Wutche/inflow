@@ -69,8 +69,8 @@ describe('Module Resolution', () => {
     // It's tested by the E2E tests instead
     // Here we just verify @stacks/transactions can be imported
     const importModule = async () => {
-      const module = await import('@stacks/transactions');
-      return module;
+      const stacksModule = await import('@stacks/transactions');
+      return stacksModule;
     };
 
     await expect(importModule()).resolves.toBeDefined();
