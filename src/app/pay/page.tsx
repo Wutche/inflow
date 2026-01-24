@@ -204,14 +204,18 @@ function ValidInvoiceUI({ data }: { data: InvoiceData }) {
 
     try {
       // Determine target network (default to cross-chain if not specified)
-      const targetNetwork = data.targetNetwork || (payerNetwork === "stacks" ? "ethereum" : "stacks");
-      
+      const targetNetwork =
+        data.targetNetwork ||
+        (payerNetwork === "stacks" ? "ethereum" : "stacks");
+
       // Determine bridge direction
       let direction: BridgeDirection;
       if (payerNetwork === "stacks") {
-        direction = targetNetwork === "stacks" ? "stacks-to-stacks" : "stacks-to-eth";
+        direction =
+          targetNetwork === "stacks" ? "stacks-to-stacks" : "stacks-to-eth";
       } else {
-        direction = targetNetwork === "ethereum" ? "eth-to-eth" : "eth-to-stacks";
+        direction =
+          targetNetwork === "ethereum" ? "eth-to-eth" : "eth-to-stacks";
       }
 
       await bridge(direction, data.amount, data.recipient);
@@ -247,9 +251,9 @@ function ValidInvoiceUI({ data }: { data: InvoiceData }) {
               {/* Confirmation Note */}
               <div className="p-4 bg-amber-50 border border-amber-100 rounded-xl mb-6">
                 <p className="text-sm text-amber-800">
-                  <strong>Note:</strong> It takes 10 to 15 minutes for
-                  confirmation and for the recipient to receive the equivalent
-                  amount.
+                  <strong>Note:</strong>Bridge transfers takes 10 to 15 minutes
+                  for confirmation and for the recipient to receive the
+                  equivalent amount.
                 </p>
               </div>
 
@@ -369,7 +373,16 @@ function ValidInvoiceUI({ data }: { data: InvoiceData }) {
                     >
                       <div className="w-1 h-1 rounded-full bg-white" />
                     </div>
-                    {(data.targetNetwork || (payerNetwork === "stacks" ? "ethereum" : "stacks")).charAt(0).toUpperCase() + (data.targetNetwork || (payerNetwork === "stacks" ? "ethereum" : "stacks")).slice(1)}
+                    {(
+                      data.targetNetwork ||
+                      (payerNetwork === "stacks" ? "ethereum" : "stacks")
+                    )
+                      .charAt(0)
+                      .toUpperCase() +
+                      (
+                        data.targetNetwork ||
+                        (payerNetwork === "stacks" ? "ethereum" : "stacks")
+                      ).slice(1)}
                   </span>
                 </div>
 
