@@ -13,6 +13,9 @@
 ![Sepolia](https://img.shields.io/badge/Ethereum-Sepolia-627EEA?style=for-the-badge&logo=ethereum&logoColor=white)
 ![x402](https://img.shields.io/badge/x402-Protocol-FF8A00?style=for-the-badge)
 
+**Problem:** Liquidity Fragmentation & AI Agent Payments.
+**Solution:** A Cross-Chain, x402-compliant invoicing protocol.
+
 **Inflow** bridges USDC between Ethereum and Bitcoin-secured Stacks using Circle's xReserve, enabling seamless cross-chain invoicing with instant settlement. It leverages the novel **x402 protocol** to turn API endpoints into pay-per-use services, creating the first truly monetizable, spam-proof developer infrastructure on Stacks.
 
 ---
@@ -223,4 +226,4 @@ MIT License - See LICENSE file for details.
 
 ---
 
-**Built for the Programming USDCx on Stacks Challenge** | [Live Demo](https://inflow.app) | [GitHub](https://github.com/yourusername/inflow-app)
+**Built with ❤️ by Inflow Contributors on Stacks** | [Live Demo](https://inflow.app) | [GitHub](https://github.com/yourusername/inflow-app)
